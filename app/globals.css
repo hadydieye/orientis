@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+:root {
+  --background: #070B14;
+  --background-secondary: #0D1424;
+  --background-tertiary: #111A2E;
+
+  --primary: #6C63FF;
+  --secondary: #21D4FD;
+  --accent: #A855F7;
+  --highlight: #8BFFE7;
+
+  --foreground: #F5F7FF;
+  --muted: #9CA9C7;
+  --muted-dark: #66728D;
+
+  --success: #35E0A1;
+  --warning: #FFB84D;
+  --error: #FF647C;
+
+  --glass-1: rgba(255, 255, 255, .04);
+  --glass-2: rgba(255, 255, 255, .06);
+  --glass-3: rgba(255, 255, 255, .08);
+  --glass-border: rgba(255, 255, 255, .10);
+  --glass-border-hover: rgba(255, 255, 255, .16);
+
+  /* Aurora drift amplitude — reduced on small screens, see media query below */
+  --aurora-shift: 3%;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-tertiary: var(--background-tertiary);
+
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-highlight: var(--highlight);
+
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-dark: var(--muted-dark);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
+  --color-glass-1: var(--glass-1);
+  --color-glass-2: var(--glass-2);
+  --color-glass-3: var(--glass-3);
+  --color-glass-border: var(--glass-border);
+  --color-glass-border-hover: var(--glass-border-hover);
+
+  --radius-input: 12px;
+  --radius-button: 14px;
+  --radius-card: 20px;
+  --radius-panel: 24px;
+  --radius-hero: 32px;
+  --radius-modal: 28px;
+  --radius-pill: 9999px;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --animate-fade-in-up: fade-in-up 0.4s ease-out both;
+  --animate-step-in: step-in 0.2s ease-out both;
+  --animate-aurora-a: aurora-drift-a 14s ease-in-out infinite alternate;
+  --animate-aurora-b: aurora-drift-b 18s ease-in-out infinite alternate;
+  --animate-aurora-c: aurora-drift-c 20s ease-in-out infinite alternate;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Transition entre étapes du parcours : courte et discrète (200ms). */
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes aurora-drift-a {
+  from {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(-50%, -50%) translate(var(--aurora-shift), calc(var(--aurora-shift) * 0.6)) scale(1.05);
+  }
+}
+
+@keyframes aurora-drift-b {
+  from {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(-50%, -50%) translate(calc(var(--aurora-shift) * -1), var(--aurora-shift)) scale(1.03);
+  }
+}
+
+@keyframes aurora-drift-c {
+  from {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(-50%, -50%) translate(calc(var(--aurora-shift) * 0.5), calc(var(--aurora-shift) * -1)) scale(1.04);
+  }
+}
+
+/* Smaller drift amplitude on mobile — same motion, less of it. */
+@media (max-width: 640px) {
+  :root {
+    --aurora-shift: 1.4%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
