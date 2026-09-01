@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Logo } from "@/components/layout/Logo";
 import { LoginForm } from "@/components/admin/LoginForm";
 import { getAdminSession } from "@/lib/auth/admin";
 
-export const metadata: Metadata = { title: "Connexion — Orientis" };
+export const metadata: Metadata = { title: "Connexion" };
 export const dynamic = "force-dynamic";
 
 export default async function LoginPage({
@@ -21,6 +22,10 @@ export default async function LoginPage({
 
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-4 py-16">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <Logo size={48} textClassName="text-xl" priority />
+      </div>
+
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">Connexion</h1>
         <p className="text-sm text-muted">

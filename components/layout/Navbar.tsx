@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Logo } from "@/components/layout/Logo";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { GlassInput } from "@/components/ui/GlassInput";
 
@@ -20,10 +21,13 @@ export function Navbar() {
   return (
     <header className="fixed inset-x-3 top-3 z-50 sm:inset-x-6 sm:top-4 md:inset-x-10">
       <div className="mx-auto flex max-w-6xl items-center gap-4 rounded-pill border border-glass-border bg-[rgba(7,11,20,0.65)] px-4 py-2.5 backdrop-blur-[20px] sm:px-6">
-        <Link href="/" className="text-lg font-bold tracking-tight">
-          <span className="bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Orientis
-          </span>
+        <Link
+          href="/"
+          aria-label="Orientis — accueil"
+          className="rounded outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          {/* priority : la marque est au-dessus de la ligne de flottaison. */}
+          <Logo size={28} priority />
         </Link>
 
         <nav className="ml-2 hidden flex-1 items-center gap-6 md:flex">

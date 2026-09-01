@@ -7,7 +7,7 @@ import { GlassPanel } from "@/components/ui/GlassPanel";
 import { getHomeData } from "@/lib/queries/home";
 
 export const metadata: Metadata = {
-  title: "À propos — Orientis",
+  title: "À propos",
   description:
     "Comment Orientis collecte ses données, comment la fiabilité de chaque information est signalée, et comment nous contacter.",
 };
@@ -183,11 +183,11 @@ export default async function AProposPage() {
           les plus utiles.
         </p>
         <a
-          href="mailto:contact@orientis.gn?subject=Signalement%20Orientis"
+          href="mailto:orientisgn@proton.me?subject=Signalement%20Orientis"
           className="inline-flex w-fit items-center gap-2 rounded-button bg-linear-to-r from-primary to-secondary px-5 py-2.5 text-sm font-semibold text-white outline-none transition-opacity duration-150 ease-out hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary"
         >
           <Mail className="h-4 w-4" aria-hidden />
-          contact@orientis.gn
+          orientisgn@proton.me
         </a>
       </Section>
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Compass, Home, Search } from "lucide-react";
+import { Home, Search } from "lucide-react";
 import { AuroraBackground } from "@/components/layout/AuroraBackground";
+import { Logo } from "@/components/layout/Logo";
 
 /**
  * 404 personnalisée.
@@ -16,9 +17,7 @@ export default function NotFound() {
       <AuroraBackground />
       <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-4 py-24 text-center sm:px-6">
         <div className="animate-fade-in-up flex flex-col items-center gap-5">
-          <span className="flex h-16 w-16 items-center justify-center rounded-panel border border-glass-border bg-glass-2 text-secondary">
-            <Compass className="h-7 w-7" aria-hidden />
-          </span>
+          <Logo size={56} withWordmark={false} />
 
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
             Erreur 404

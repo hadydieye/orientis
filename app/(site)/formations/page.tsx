@@ -4,7 +4,7 @@ import { ProgramsCatalog } from "@/components/formations/ProgramsCatalog";
 import { getCatalogPrograms } from "@/lib/queries/programs";
 
 export const metadata: Metadata = {
-  title: "Toutes les formations — Orientis",
+  title: "Toutes les formations",
   description:
     "Les formations post-bac référencées en Guinée, filtrables par niveau, établissement et domaine.",
 };

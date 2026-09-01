@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ShieldAlert } from "lucide-react";
+import { Logo } from "@/components/layout/Logo";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { getAdminSession } from "@/lib/auth/admin";
 
@@ -39,8 +40,13 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
     <div className="flex min-h-screen flex-1 flex-col bg-background-secondary lg:flex-row">
       <aside className="border-b border-glass-border bg-background px-4 py-5 lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r">
         <div className="mb-6 flex items-center justify-between gap-3">
-          <Link href="/admin" className="font-bold tracking-tight">
-            Orientis <span className="text-muted">admin</span>
+          <Link
+            href="/admin"
+            aria-label="Orientis admin — vue d'ensemble"
+            className="flex items-center gap-2 rounded outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <Logo size={26} textClassName="text-base" />
+            <span className="text-sm text-muted">admin</span>
           </Link>
         </div>
 

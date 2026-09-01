@@ -4,7 +4,7 @@ import { ExplorerCatalog } from "@/components/explorer/ExplorerCatalog";
 import { getCatalogInstitutions } from "@/lib/queries/institutions";
 
 export const metadata: Metadata = {
-  title: "Explorer les établissements — Orientis",
+  title: "Explorer les établissements",
   description:
     "Tous les établissements d'enseignement supérieur référencés en Guinée.",
 };

@@ -5,7 +5,7 @@ import { GlassPanel } from "@/components/ui/GlassPanel";
 import { INTEREST_TO_DOMAINS } from "@/lib/orientation/score";
 
 export const metadata: Metadata = {
-  title: "Comment calculons-nous ce score ? — Orientis",
+  title: "Comment calculons-nous ce score ?",
   description:
     "La formule exacte du score de correspondance des recommandations d'orientation, critère par critère.",
 };

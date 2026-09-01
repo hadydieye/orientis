@@ -3,7 +3,7 @@ import { OrientationFlow } from "@/components/orientation/OrientationFlow";
 import { getCatalogInstitutions } from "@/lib/queries/institutions";
 
 export const metadata: Metadata = {
-  title: "Trouver ma voie — Orientis",
+  title: "Trouver ma voie",
   description:
     "Réponds à deux questions et découvre les formations qui correspondent à ton profil.",
 };

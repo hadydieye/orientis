@@ -53,9 +53,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const institution = await getInstitutionDetail(id);
-  if (!institution) return { title: "Établissement introuvable — Orientis" };
+  if (!institution) return { title: "Établissement introuvable" };
   return {
-    title: `${institution.name} — Orientis`,
+    title: `${institution.name}`,
     description:
       institution.description ??
       `${institution.name}, ${institution.city ?? "Guinée"} — formations et informations.`,
