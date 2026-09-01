@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { reviewStatusLabel } from "@/lib/labels";
 
 export function SectionHeader({
   title,
@@ -24,7 +25,9 @@ export function SectionHeader({
         <p className="mt-1 text-sm text-muted">
           {count} {noun}
           {count > 1 ? "s" : ""}
-          {activeFilter !== "tous" ? ` (filtre : ${activeFilter})` : ""}
+          {activeFilter !== "tous"
+          ? ` (filtre : ${reviewStatusLabel(activeFilter, true).toLowerCase()})`
+          : ""}
         </p>
       </div>
       <Link

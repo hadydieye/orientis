@@ -62,3 +62,36 @@ export function reliabilityLabel(source: ReliabilitySource | null) {
     ? RELIABILITY_LABEL.official
     : RELIABILITY_LABEL.unofficial;
 }
+
+
+/**
+ * Vocabulaire de modération — source unique de vérité.
+ *
+ * `review_status` est une valeur de base de données (`pending` / `approved` /
+ * `rejected`). Elle ne doit jamais atteindre l'écran telle quelle : un
+ * contributeur qui lit « pending » sur sa soumission ne sait pas si c'est un
+ * état normal ou une erreur.
+ *
+ * À ne pas confondre avec RELIABILITY_LABEL, qui qualifie une SOURCE
+ * (officiel / tiers) et non l'avancement d'une contribution. Les deux
+ * cohabitent sur les mêmes écrans, d'où l'importance de ne pas les mélanger.
+ */
+export const REVIEW_STATUS_LABEL: Record<string, string> = {
+  pending: "En attente de validation",
+  approved: "Validée",
+  rejected: "Rejetée",
+};
+
+/** Forme courte, pour les cellules de tableau et les filtres. */
+export const REVIEW_STATUS_SHORT: Record<string, string> = {
+  pending: "En attente",
+  approved: "Validée",
+  rejected: "Rejetée",
+};
+
+export function reviewStatusLabel(status: string, short = false): string {
+  const map = short ? REVIEW_STATUS_SHORT : REVIEW_STATUS_LABEL;
+  // Une valeur inconnue est affichée telle quelle plutôt que masquée : mieux
+  // vaut un libellé étrange qu'un statut silencieusement escamoté.
+  return map[status] ?? status;
+}

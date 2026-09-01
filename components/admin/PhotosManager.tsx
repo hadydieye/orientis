@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { Check, ImagePlus, Loader2, Trash2, X } from "lucide-react";
 import { ReviewBadge } from "@/components/admin/ReviewBadge";
 import { formatBytes, removeObject, uploadPhoto } from "@/lib/storage/images";
 
@@ -28,16 +28,20 @@ export function PhotosManager({
   institutionId,
   photos,
   canDelete,
+  canModerate = false,
 }: {
   institutionId: string;
   photos: AdminPhoto[];
   canDelete: boolean;
+  /** Approuver / rejeter est réservé aux admins (policy admin_update). */
+  canModerate?: boolean;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [moderating, setModerating] = useState<string | null>(null);
   const [captions, setCaptions] = useState<Record<string, string>>(
     Object.fromEntries(photos.map((p) => [p.id, p.caption ?? ""]))
   );
@@ -104,6 +108,34 @@ export function PhotosManager({
       return;
     }
     router.refresh();
+  }
+
+  /**
+   * Approuve ou rejette la photo sans quitter la carte.
+   *
+   * `router.refresh()` fait relire la donnée aux Server Components : le badge
+   * reflète l'état réel en base, pas un état local optimiste qui pourrait
+   * diverger si la policy refusait l'écriture.
+   */
+  async function moderate(photo: AdminPhoto, action: "approve" | "reject") {
+    setModerating(`${photo.id}:${action}`);
+    setError(null);
+    try {
+      const res = await fetch(`/admin/institution_photos/${photo.id}/${action}`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError(body.error ?? `Échec (${res.status})`);
+        setModerating(null);
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError("Erreur réseau");
+    } finally {
+      setModerating(null);
+    }
   }
 
   async function deletePhoto(photo: AdminPhoto) {
@@ -184,7 +216,44 @@ export function PhotosManager({
                 />
               </div>
 
-              <ReviewBadge status={p.reviewStatus} />
+              <div className="flex flex-wrap items-center gap-2">
+                <ReviewBadge status={p.reviewStatus} />
+
+                {/* Modération sur place : pas besoin d'aller ailleurs pour
+                    valider une photo qu'on vient de téléverser. Chaque bouton
+                    ne s'affiche que s'il change quelque chose. */}
+                {canModerate && p.reviewStatus !== "approved" && (
+                  <button
+                    type="button"
+                    onClick={() => moderate(p, "approve")}
+                    disabled={moderating !== null || busy}
+                    className="inline-flex items-center gap-1 rounded-button border border-success/30 bg-success/15 px-2 py-0.5 text-[11px] font-medium text-success outline-none transition-opacity duration-150 ease-out hover:opacity-80 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    {moderating === `${p.id}:approve` ? (
+                      <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+                    ) : (
+                      <Check className="h-3 w-3" aria-hidden />
+                    )}
+                    Approuver
+                  </button>
+                )}
+
+                {canModerate && p.reviewStatus !== "rejected" && (
+                  <button
+                    type="button"
+                    onClick={() => moderate(p, "reject")}
+                    disabled={moderating !== null || busy}
+                    className="inline-flex items-center gap-1 rounded-button border border-warning/30 bg-warning/15 px-2 py-0.5 text-[11px] font-medium text-warning outline-none transition-opacity duration-150 ease-out hover:opacity-80 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    {moderating === `${p.id}:reject` ? (
+                      <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+                    ) : (
+                      <X className="h-3 w-3" aria-hidden />
+                    )}
+                    Rejeter
+                  </button>
+                )}
+              </div>
 
               <label className="sr-only" htmlFor={`caption-${p.id}`}>
                 Légende

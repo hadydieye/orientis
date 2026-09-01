@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { EntityForm } from "@/components/admin/EntityForm";
+import { ReviewBadge } from "@/components/admin/ReviewBadge";
 import { PROGRAM_NUMERIC, programFields } from "@/components/admin/forms/ProgramFields";
 import { getAdminRow, getDepartmentOptions } from "@/lib/queries/admin-catalog";
 
@@ -33,7 +34,7 @@ export default async function EditProgramPage({
         </Link>
         <h1 className="mt-3 text-2xl font-bold tracking-tight">{row.name}</h1>
         <p className="mt-1 text-sm text-muted">
-          Statut de validation : <strong>{row.review_status}</strong>
+          Statut de validation <ReviewBadge status={row.review_status} short={false} className="ml-1 align-middle" />
         </p>
       </div>
 

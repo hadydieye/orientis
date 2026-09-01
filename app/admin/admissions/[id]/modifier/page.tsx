@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { EntityForm } from "@/components/admin/EntityForm";
+import { ReviewBadge } from "@/components/admin/ReviewBadge";
 import { ADMISSION_NUMERIC, admissionFields } from "@/components/admin/forms/AdmissionFields";
 import {
   getAcademicYearOptions, getAdminRow, getProgramOptions, getSourceOptions,
@@ -40,7 +41,7 @@ export default async function EditAdmissionPage({
         </Link>
         <h1 className="mt-3 text-2xl font-bold tracking-tight">{programLabel}</h1>
         <p className="mt-1 text-sm text-muted">
-          Statut de validation : <strong>{row.review_status}</strong>
+          Statut de validation <ReviewBadge status={row.review_status} short={false} className="ml-1 align-middle" />
         </p>
       </div>
 

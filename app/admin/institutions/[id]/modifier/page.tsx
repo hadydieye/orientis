@@ -10,6 +10,7 @@ import { getAdminInstitutionPhotos } from "@/lib/queries/admin-catalog";
 import { getAdminSession } from "@/lib/auth/admin";
 import { LogoUploader } from "@/components/admin/LogoUploader";
 import { PhotosManager } from "@/components/admin/PhotosManager";
+import { ReviewBadge } from "@/components/admin/ReviewBadge";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +62,7 @@ export default async function EditInstitutionPage({
           {institution.name}
         </h1>
         <p className="mt-1 text-sm text-muted">
-          Statut de validation : <strong>{institution.review_status}</strong>
+          Statut de validation <ReviewBadge status={institution.review_status} short={false} className="ml-1 align-middle" />
         </p>
       </div>
 
@@ -71,6 +72,7 @@ export default async function EditInstitutionPage({
         institutionId={id}
         photos={photos}
         canDelete={session?.isAdmin ?? false}
+        canModerate={session?.isAdmin ?? false}
       />
 
       <InstitutionForm initial={initial} institutionId={id} />
