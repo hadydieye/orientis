@@ -42,9 +42,9 @@ export function Navbar() {
           <GlassInput type="search" placeholder="Rechercher..." />
         </div>
 
-        <GlassButton variant="primary" className="hidden shrink-0 sm:inline-flex">
-          Trouver ma voie
-        </GlassButton>
+        <Link href="/orientation" className="hidden shrink-0 sm:inline-flex">
+          <GlassButton variant="primary">Trouver ma voie</GlassButton>
+        </Link>
 
         <button
           type="button"

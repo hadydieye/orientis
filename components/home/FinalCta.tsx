@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Compass } from "lucide-react";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { GlassPanel } from "@/components/ui/GlassPanel";
@@ -19,7 +20,11 @@ export function FinalCta() {
         t&apos;intéresse. On te proposera les filières qui te correspondent.
       </p>
       <div className="mt-7 flex justify-center">
-        <GlassButton variant="primary">Faire le test d&apos;orientation</GlassButton>
+        <Link href="/orientation" className="inline-flex">
+          <GlassButton variant="primary">
+            Faire le test d&apos;orientation
+          </GlassButton>
+        </Link>
       </div>
     </GlassPanel>
   );

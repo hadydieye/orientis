@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { GlassBadge } from "@/components/ui/GlassBadge";
 import { GlassButton } from "@/components/ui/GlassButton";
@@ -32,15 +33,24 @@ export function Hero({ cities = [] }: { cities?: CityCount[] }) {
           celle qui te correspond vraiment.
         </p>
 
+        {/* Les deux CTA étaient de simples <button> sans handler ni lien :
+            inertes sur tous les supports. Enveloppés dans des <Link>, ils
+            fonctionnent aussi sans JavaScript. */}
         <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <GlassButton variant="primary" className="group">
-            Trouver ma filière
-            <ArrowRight
-              className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
-              aria-hidden
-            />
-          </GlassButton>
-          <GlassButton variant="secondary">Explorer les formations</GlassButton>
+          <Link href="/orientation" className="inline-flex">
+            <GlassButton variant="primary" className="group w-full sm:w-auto">
+              Trouver ma filière
+              <ArrowRight
+                className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </GlassButton>
+          </Link>
+          <Link href="/formations" className="inline-flex">
+            <GlassButton variant="secondary" className="w-full sm:w-auto">
+              Explorer les formations
+            </GlassButton>
+          </Link>
         </div>
       </div>
     </section>
