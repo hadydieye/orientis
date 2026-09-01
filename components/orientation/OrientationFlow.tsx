@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2, SearchX } from "lucide-react";
 import { GlassButton } from "@/components/ui/GlassButton";
@@ -11,9 +11,15 @@ import { RefineProfile } from "@/components/orientation/RefineProfile";
 import { RecommendationCard } from "@/components/orientation/RecommendationCard";
 import {
   getRecommendations,
-  type Preferences,
   type Recommendation,
 } from "@/app/(site)/orientation/actions";
+import {
+  EMPTY_CRITERIA,
+  explainEmptyResult,
+  filterRecommendations,
+  hasActiveCriteria,
+  type RefineCriteria,
+} from "@/lib/orientation/filter";
 import { cn } from "@/lib/cn";
 
 // Seules les séries réellement présentes dans les données sont proposées.
@@ -30,7 +36,8 @@ export function OrientationFlow({ cities }: { cities: string[] }) {
   const [series, setSeries] = useState<string | null>(null);
   const [average, setAverage] = useState("");
   const [results, setResults] = useState<Recommendation[] | null>(null);
-  const [preferences, setPreferences] = useState<Preferences>({});
+  const [criteria, setCriteria] = useState<RefineCriteria>(EMPTY_CRITERIA);
+  const [filterEnabled, setFilterEnabled] = useState(true);
   const [domainCoverage, setDomainCoverage] = useState({ withDomain: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -53,7 +60,10 @@ export function OrientationFlow({ cities }: { cities: string[] }) {
     setError(null);
 
     startTransition(async () => {
-      const res = await getRecommendations(series, averageValue, preferences);
+      const res = await getRecommendations(series, averageValue, {
+        city: criteria.city,
+        interests: criteria.interests,
+      });
       if (res.error) {
         setError(res.error);
         return;
@@ -81,16 +91,29 @@ export function OrientationFlow({ cities }: { cities: string[] }) {
     setSeries(null);
     setAverage("");
     setResults(null);
-    setPreferences({});
+    setCriteria(EMPTY_CRITERIA);
+    setFilterEnabled(true);
     setError(null);
   }
 
-  /** Relance le calcul avec les préférences : c'est ce qui les rend actives. */
-  function applyPreferences(next: Preferences) {
+  /**
+   * Applique les critères d'affinement.
+   *
+   * Deux effets distincts : le serveur recalcule le SCORE avec ces
+   * préférences (elles valent des points), et le filtrage ci-dessous ÉCARTE
+   * les formations qui n'y répondent pas. Le filtre est fait ici, côté
+   * client, pour que le basculement du toggle soit instantané et pour garder
+   * la liste complète sous la main en cas de repli.
+   */
+  function applyPreferences(next: RefineCriteria) {
     if (!series || !averageValid) return;
-    setPreferences(next);
+    setCriteria(next);
+    setFilterEnabled(true);
     startTransition(async () => {
-      const res = await getRecommendations(series, averageValue, next);
+      const res = await getRecommendations(series, averageValue, {
+        city: next.city,
+        interests: next.interests,
+      });
       if (res.error) {
         setError(res.error);
         return;
@@ -99,6 +122,30 @@ export function OrientationFlow({ cities }: { cities: string[] }) {
       setDomainCoverage(res.domainCoverage);
     });
   }
+
+  // Liste effectivement affichée + repli quand l'intersection est vide.
+  const view = useMemo(() => {
+    const all = results ?? [];
+    const active = hasActiveCriteria(criteria) && filterEnabled;
+    if (!active) return { list: all, filtered: false, fellBack: false, reason: "" };
+    const kept = filterRecommendations(all, criteria);
+    if (kept.length > 0) return { list: kept, filtered: true, fellBack: false, reason: "" };
+    // Jamais d'écran vide : on retombe sur la liste complète en l'annonçant.
+    return {
+      list: all,
+      filtered: false,
+      fellBack: true,
+      reason: explainEmptyResult(all, criteria),
+    };
+  }, [results, criteria, filterEnabled]);
+
+  const matchCount = useMemo(
+    () =>
+      results && hasActiveCriteria(criteria)
+        ? filterRecommendations(results, criteria).length
+        : null,
+    [results, criteria]
+  );
 
   return (
     <div className="flex flex-col gap-10">
@@ -225,6 +272,21 @@ export function OrientationFlow({ cities }: { cities: string[] }) {
 
       {step === 2 && results && (
         <section key="step-2" className="animate-step-in flex flex-col gap-6">
+          {/* Placé AVANT la liste : l'option d'affiner doit se voir avant de
+              parcourir les résultats, pas après les avoir tous lus. */}
+          {results.length > 0 && (
+            <RefineProfile
+              cities={cities}
+              onApply={applyPreferences}
+              applying={pending}
+              active={criteria}
+              filterEnabled={filterEnabled}
+              onToggleFilter={setFilterEnabled}
+              matchCount={matchCount}
+              domainCoverage={domainCoverage}
+            />
+          )}
+
           {results.length === 0 ? (
             <GlassPanel variant="1" className="px-6 py-12 text-center">
               <SearchX className="mx-auto h-8 w-8 text-muted-dark" aria-hidden />
@@ -255,11 +317,16 @@ export function OrientationFlow({ cities }: { cities: string[] }) {
             <>
               <div className="text-center">
                 <h2 className="text-xl font-bold sm:text-2xl">
-                  {results.length} formation{results.length > 1 ? "s" : ""}{" "}
-                  correspond{results.length > 1 ? "ent" : ""} à ton profil
+                  {view.list.length} formation{view.list.length > 1 ? "s" : ""}{" "}
+                  {view.filtered ? "retenue" : "correspond"}
+                  {view.list.length > 1 ? (view.filtered ? "s" : "ent") : ""}
+                  {view.filtered ? " par tes critères" : " à ton profil"}
                 </h2>
                 <p className="mt-2 text-sm text-muted">
                   Série {series} · moyenne {averageValue}/20
+                  {view.filtered && results.length > view.list.length
+                    ? ` · ${results.length - view.list.length} écartée${results.length - view.list.length > 1 ? "s" : ""} par le filtre`
+                    : ""}
                 </p>
                 <p className="mt-3 text-sm text-muted">
                   Classées par nombre de critères vérifiés — ce n&apos;est pas
@@ -271,20 +338,30 @@ export function OrientationFlow({ cities }: { cities: string[] }) {
                     Comment calculons-nous ce score&nbsp;?
                   </Link>
                 </p>
-                {preferences.interests &&
-                  preferences.interests.length > 0 &&
-                  domainCoverage.withDomain < domainCoverage.total && (
-                    <p className="mx-auto mt-3 max-w-lg text-xs leading-relaxed text-muted-dark">
-                      Le critère « domaine » ne peut jouer que sur{" "}
-                      {domainCoverage.withDomain} de ces{" "}
-                      {domainCoverage.total} formations : le champ domaine
-                      n&apos;est pas encore renseigné pour les autres.
-                    </p>
-                  )}
               </div>
 
+              {/* Repli : l'intersection est vide, on montre la liste complète
+                  en disant pourquoi plutôt que de laisser un écran vide. */}
+              {view.fellBack && (
+                <div
+                  role="status"
+                  className="flex items-start gap-3 rounded-card border border-warning/30 bg-warning/10 p-4"
+                >
+                  <SearchX className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-semibold">
+                      Aucune formation ne correspond à ces critères précis.
+                      Voici les résultats sans ce filtre&nbsp;:
+                    </p>
+                    <p className="text-sm leading-relaxed text-muted">
+                      {view.reason}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col gap-4">
-                {results.map((r) => (
+                {view.list.map((r) => (
                   <RecommendationCard
                     key={r.id}
                     recommendation={r}
@@ -305,11 +382,6 @@ export function OrientationFlow({ cities }: { cities: string[] }) {
           )}
 
           <div className="flex flex-wrap justify-center gap-3">
-            <RefineProfile
-              cities={cities}
-              onApply={applyPreferences}
-              applying={pending}
-            />
             <button
               type="button"
               onClick={restart}

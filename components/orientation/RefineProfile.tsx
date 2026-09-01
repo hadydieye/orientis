@@ -33,16 +33,31 @@ export function RefineProfile({
   cities,
   onApply,
   applying,
+  active,
+  filterEnabled,
+  onToggleFilter,
+  matchCount,
+  domainCoverage,
 }: {
   cities: string[];
   onApply: (preferences: { city: string | null; interests: string[] }) => void;
   applying?: boolean;
+  /** Critères actuellement appliqués, pour le résumé replié. */
+  active: { city: string | null; interests: string[] };
+  filterEnabled: boolean;
+  onToggleFilter: (on: boolean) => void;
+  /** Nombre de formations retenues par le filtre, si actif. */
+  matchCount: number | null;
+  /** Couverture du champ `domain` sur les résultats courants. */
+  domainCoverage: { withDomain: number; total: number };
 }) {
   const [open, setOpen] = useState(false);
-  const [interests, setInterests] = useState<string[]>([]);
-  const [city, setCity] = useState("");
+  const [interests, setInterests] = useState<string[]>(active.interests);
+  const [city, setCity] = useState(active.city ?? "");
   const [budget, setBudget] = useState("");
   const [status, setStatus] = useState<Status>("idle");
+
+  const hasActive = Boolean(active.city) || active.interests.length > 0;
 
   function toggle(interest: string) {
     setInterests((prev) =>
@@ -77,14 +92,55 @@ export function RefineProfile({
     // préférences sont dans l'état local, les résultats doivent bouger même
     // si la sauvegarde du profil échoue.
     onApply({ city: city || null, interests });
+    setOpen(false);
   }
 
   if (!open) {
     return (
-      <GlassButton variant="secondary" onClick={() => setOpen(true)}>
-        <Compass className="h-4 w-4" aria-hidden />
-        Affiner mon profil
-      </GlassButton>
+      <div className="flex w-full flex-col items-center gap-3 rounded-panel border border-glass-border bg-glass-1 p-4 sm:flex-row sm:justify-between sm:p-5">
+        <div className="flex flex-col gap-1 text-center sm:text-left">
+          <span className="text-sm font-medium">
+            {hasActive ? "Profil affiné" : "Affiner mon profil"}
+          </span>
+          <span className="text-xs leading-relaxed text-muted">
+            {hasActive ? (
+              <>
+                {[
+                  active.city ? `ville : ${active.city}` : null,
+                  active.interests.length
+                    ? `intérêts : ${active.interests.join(", ")}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                {filterEnabled && matchCount !== null
+                  ? ` — ${matchCount} formation${matchCount > 1 ? "s" : ""} retenue${matchCount > 1 ? "s" : ""}`
+                  : " — filtre désactivé"}
+              </>
+            ) : (
+              "Ville et centres d'intérêt : ils filtrent les résultats, pas seulement leur ordre."
+            )}
+          </span>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-3">
+          {hasActive && (
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-muted">
+              <input
+                type="checkbox"
+                checked={filterEnabled}
+                onChange={(e) => onToggleFilter(e.target.checked)}
+                className="h-4 w-4 accent-[var(--primary)]"
+              />
+              Filtrer
+            </label>
+          )}
+          <GlassButton variant="secondary" onClick={() => setOpen(true)}>
+            <Compass className="h-4 w-4" aria-hidden />
+            {hasActive ? "Modifier" : "Choisir mes critères"}
+          </GlassButton>
+        </div>
+      </div>
     );
   }
 
@@ -92,8 +148,9 @@ export function RefineProfile({
     <div className="w-full animate-step-in rounded-panel border border-glass-border bg-glass-1 p-5 text-left sm:p-6">
       <h3 className="font-semibold">Affiner mon profil</h3>
       <p className="mt-1 text-sm text-muted">
-        La ville et les centres d&apos;intérêt entrent dans le score et
-        reclassent les résultats ci-dessus.{" "}
+        La ville et les centres d&apos;intérêt <strong className="text-foreground">filtrent</strong>{" "}
+        les résultats ci-dessous : seules les formations qui y répondent
+        restent affichées. Le score, lui, continue de les classer.{" "}
         <Link
           href="/orientation/score"
           className="rounded text-secondary outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
@@ -125,6 +182,20 @@ export function RefineProfile({
             );
           })}
         </div>
+        {/* Le champ `domain` est renseigné sur très peu de formations :
+            l'annoncer AVANT de cocher évite de découvrir une liste vide. */}
+        {domainCoverage.total > 0 &&
+          domainCoverage.withDomain < domainCoverage.total && (
+            <p className="mt-3 text-xs leading-relaxed text-muted-dark">
+              Attention : le domaine n&apos;est renseigné que sur{" "}
+              <strong className="text-muted">
+                {domainCoverage.withDomain} des {domainCoverage.total}
+              </strong>{" "}
+              formations retenues. Filtrer sur les centres d&apos;intérêt en
+              écartera donc l&apos;essentiel — la ville est un critère plus
+              fiable pour l&apos;instant.
+            </p>
+          )}
       </fieldset>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -194,8 +265,16 @@ export function RefineProfile({
             ? "Recalcul..."
             : status === "saving"
               ? "Enregistrement..."
-              : "Appliquer à mes résultats"}
+              : "Appliquer et filtrer"}
         </GlassButton>
+
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="rounded-button px-3 py-2 text-sm text-muted outline-none transition-colors duration-150 ease-out hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          Annuler
+        </button>
 
         {status === "saved" && (
           <span
