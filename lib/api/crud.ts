@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -215,8 +216,40 @@ export function makeDeleteHandler(table: CatalogTable) {
       return NextResponse.json({ error: "Introuvable." }, { status: 404 });
     }
 
+    revalidatePublic(data[0] as Record<string, unknown>);
     return NextResponse.json({ deleted: data.length, id });
   };
+}
+
+/**
+ * Purge le cache des pages publiques après une écriture de modération.
+ *
+ * Les fiches publiques sont pré-générées (`generateStaticParams` +
+ * `revalidate = 3600`). Sans purge explicite, approuver une photo ne change
+ * rien pour le visiteur pendant une heure : la page servie vient du
+ * prerender, pas de la base. Constaté en build de production — photo
+ * `approved` en base, absente de la fiche, `x-nextjs-cache: HIT`.
+ *
+ * La purge est large à dessein. La modération est une action d'administration
+ * peu fréquente ; une invalidation partielle qui oublierait une page
+ * ramènerait exactement le bug qu'on corrige, pour un gain de performance
+ * sans intérêt à cette échelle.
+ */
+function revalidatePublic(row: Record<string, unknown> | null) {
+  const institutionId =
+    typeof row?.institution_id === "string" ? row.institution_id : null;
+
+  // Fiche concernée quand on la connaît directement.
+  if (institutionId) revalidatePath(`/etablissements/${institutionId}`);
+
+  // Listes et pages d'accueil, dont les compteurs bougent avec le catalogue.
+  revalidatePath("/");
+  revalidatePath("/explorer");
+  revalidatePath("/formations");
+
+  // Les tables du catalogue remontent dans des fiches qu'on ne peut pas
+  // déduire sans requête supplémentaire : on purge l'arborescence entière.
+  if (!institutionId) revalidatePath("/", "layout");
 }
 
 /** approve / reject : seul chemin autorisé pour écrire review_status. */
@@ -258,6 +291,8 @@ export function makeModerationHandler(
         { status: 404 }
       );
     }
+
+    revalidatePublic(data[0] as Record<string, unknown>);
     return NextResponse.json(data[0]);
   };
 }
