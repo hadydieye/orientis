@@ -37,6 +37,13 @@ export function StatsBar({ stats }: { stats: HomeStats }) {
       icon: MapPin,
       value: String(stats.cities),
       label: "Villes couvertes",
+      // Le découpage par ville doit couvrir toutes les institutions. S'il en
+      // manque, on le dit au lieu de laisser un écart muet entre ce compteur
+      // et « Établissements référencés ».
+      hint:
+        stats.institutionsWithoutCity > 0
+          ? `${stats.institutionsWithoutCity} établissement${stats.institutionsWithoutCity > 1 ? "s" : ""} sans ville renseignée, non repris dans la carte.`
+          : undefined,
     },
   ];
 

@@ -3,6 +3,7 @@ import { ArrowRight, Check, ChevronRight, HelpCircle, MapPin, Minus, X } from "l
 import { GlassBadge } from "@/components/ui/GlassBadge";
 import { ReliabilityTag } from "@/components/program/SourceReliability";
 import { LEVEL_LABEL } from "@/lib/labels";
+import { LimitedInfoBadge } from "@/components/program/LimitedInfoBadge";
 import type { Recommendation } from "@/app/(site)/orientation/actions";
 
 import type { ScoreCriterion } from "@/lib/orientation/score";
@@ -102,6 +103,7 @@ export function RecommendationCard({
         )}
         {/* Traçabilité visible sur chaque carte, à côté des critères. */}
         <ReliabilityTag source={source} />
+        {recommendation.limitedInfo && <LimitedInfoBadge />}
       </div>
 
       <ul className="flex flex-col gap-2">

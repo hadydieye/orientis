@@ -3,9 +3,13 @@ import { Building2, MapPin } from "lucide-react";
 import { GlassBadge } from "@/components/ui/GlassBadge";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { LEVEL_LABEL } from "@/lib/labels";
+import { hasLimitedInfo } from "@/lib/programs/completeness";
+import { LimitedInfoBadge } from "@/components/program/LimitedInfoBadge";
 import type { CatalogProgram } from "@/lib/queries/programs";
 
 export function ProgramListCard({ program }: { program: CatalogProgram }) {
+  const limited = hasLimitedInfo(program);
+
   return (
     <Link
       href={`/formations/${program.id}`}
@@ -26,6 +30,7 @@ export function ProgramListCard({ program }: { program: CatalogProgram }) {
           {program.domain && (
             <GlassBadge variant="neutral">{program.domain}</GlassBadge>
           )}
+          {limited && <LimitedInfoBadge />}
         </div>
 
         <h2 className="font-semibold leading-snug">{program.name}</h2>

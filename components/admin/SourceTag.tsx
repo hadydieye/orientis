@@ -1,11 +1,13 @@
 import { AlertTriangle, BadgeCheck } from "lucide-react";
+import { RELIABILITY_LABEL, isOfficialSource } from "@/lib/labels";
 
 /**
  * Fiabilité d'une source dans les tableaux du back-office.
  *
- * Même règle que sur le site public : une source ne fait autorité que si elle
- * est officielle ET vérifiée. Tout le reste porte la mention « à vérifier »,
- * y compris ici — un chiffre ne s'affiche jamais sans son contexte.
+ * Même règle et MÊME VOCABULAIRE que sur le site public : les libellés
+ * viennent de RELIABILITY_LABEL, le verdict de isOfficialSource(). Cette
+ * variante existe uniquement pour la densité des tableaux du back-office —
+ * elle ne redéfinit ni le texte ni la règle.
  */
 export function SourceTag({
   source,
@@ -16,11 +18,11 @@ export function SourceTag({
     return (
       <span className="inline-flex items-center gap-1 rounded-pill border border-glass-border bg-glass-2 px-2 py-0.5 text-[11px] font-medium leading-none text-muted">
         <AlertTriangle className="h-3 w-3" aria-hidden />
-        Source inconnue
+        {RELIABILITY_LABEL.unknown}
       </span>
     );
   }
-  const official = source.sourceType === "officiel" && source.status === "verifie";
+  const official = isOfficialSource(source);
   return (
     <span
       title={`${source.label} (${source.sourceType}/${source.status})`}
@@ -35,7 +37,7 @@ export function SourceTag({
       ) : (
         <AlertTriangle className="h-3 w-3" aria-hidden />
       )}
-      {official ? "Officiel · vérifié" : "Non-officiel, à vérifier"}
+      {official ? RELIABILITY_LABEL.official : RELIABILITY_LABEL.unofficial}
     </span>
   );
 }

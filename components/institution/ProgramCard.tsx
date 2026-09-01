@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { GlassBadge } from "@/components/ui/GlassBadge";
 import { LEVEL_LABEL } from "@/lib/labels";
+import { hasLimitedInfo } from "@/lib/programs/completeness";
+import { LimitedInfoBadge } from "@/components/program/LimitedInfoBadge";
 import type { DetailProgram } from "@/lib/queries/institution-detail";
 
 export function ProgramCard({ program }: { program: DetailProgram }) {
@@ -22,6 +24,7 @@ export function ProgramCard({ program }: { program: DetailProgram }) {
             {program.durationYears} an{program.durationYears > 1 ? "s" : ""}
           </span>
         )}
+        {hasLimitedInfo(program) && <LimitedInfoBadge />}
       </span>
     </Link>
   );

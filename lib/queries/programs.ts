@@ -7,6 +7,10 @@ export type CatalogProgram = {
   domain: string | null;
   specialty: string | null;
   durationYears: number | null;
+  /** Champs rédactionnels : servent uniquement au test de complétude. */
+  description: string | null;
+  curriculum: string | null;
+  careerProspects: string | null;
   institutionId: string;
   institutionName: string;
   city: string | null;
@@ -27,7 +31,7 @@ export async function getCatalogPrograms() {
   const { data } = await supabase
     .from("programs")
     .select(
-      "id, name, level, domain, specialty, duration_years, departments!inner(name, academic_units!inner(institutions!inner(id, name, city)))"
+      "id, name, level, domain, specialty, duration_years, description, curriculum, career_prospects, departments!inner(name, academic_units!inner(institutions!inner(id, name, city)))"
     )
     .order("name");
 
@@ -38,6 +42,9 @@ export async function getCatalogPrograms() {
     domain: string | null;
     specialty: string | null;
     duration_years: number | null;
+    description: string | null;
+    curriculum: string | null;
+    career_prospects: string | null;
     departments: {
       name: string;
       academic_units: {
@@ -55,6 +62,9 @@ export async function getCatalogPrograms() {
       domain: p.domain,
       specialty: p.specialty,
       durationYears: p.duration_years,
+      description: p.description,
+      curriculum: p.curriculum,
+      careerProspects: p.career_prospects,
       institutionId: inst.id,
       institutionName: inst.name,
       city: inst.city,

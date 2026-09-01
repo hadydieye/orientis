@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import {
   ChevronRight,
   ExternalLink,
+  FileQuestion,
   GraduationCap,
   Languages,
   MapPin,
@@ -16,6 +17,11 @@ import {
   ReliabilityBadge,
   ReliabilityTag,
 } from "@/components/program/SourceReliability";
+import {
+  LIMITED_INFO_MESSAGE,
+  LIMITED_INFO_TITLE,
+  hasLimitedInfo,
+} from "@/lib/programs/completeness";
 import {
   FEE_TYPE_LABEL,
   FREQUENCY_LABEL,
@@ -87,11 +93,26 @@ export default async function ProgramPage({
     },
   ].filter(Boolean) as Array<{ icon: typeof Timer; label: string }>;
 
+  // Une section rédactionnelle n'est masquée que si elle est RÉELLEMENT vide.
+  // `specialty` et `furtherStudies` peuvent porter du contenu alors que les
+  // trois champs principaux sont vides : les masquer perdrait de l'information.
+  const showPresentation = Boolean(program.description || program.specialty);
+  const showProgramme = Boolean(program.curriculum);
+  const showDebouches = Boolean(program.careerProspects || program.furtherStudies);
+
+  // Le bandeau ne dépend que des trois champs rédactionnels (définition
+  // partagée avec les cartes de liste et de recommandation).
+  const limitedInfo = hasLimitedInfo({
+    description: program.description,
+    curriculum: program.curriculum,
+    careerProspects: program.careerProspects,
+  });
+
   const sections = [
-    { id: "presentation", label: "Présentation" },
+    ...(showPresentation ? [{ id: "presentation", label: "Présentation" }] : []),
     { id: "admission", label: "Conditions d'admission" },
-    { id: "programme", label: "Programme" },
-    { id: "debouches", label: "Débouchés" },
+    ...(showProgramme ? [{ id: "programme", label: "Programme" }] : []),
+    ...(showDebouches ? [{ id: "debouches", label: "Débouchés" }] : []),
     { id: "frais", label: "Frais" },
     { id: "inscription", label: "Inscription" },
     { id: "sources", label: "Sources" },
@@ -173,6 +194,24 @@ export default async function ProgramPage({
           </ul>
         </GlassPanel>
 
+        {limitedInfo && (
+          <div
+            role="status"
+            className="flex items-start gap-3 rounded-card border border-warning/30 bg-warning/10 p-4"
+          >
+            <FileQuestion className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-semibold">{LIMITED_INFO_TITLE}</p>
+              <p className="text-sm leading-relaxed text-muted">
+                {LIMITED_INFO_MESSAGE} Ni présentation, ni contenu de programme,
+                ni débouchés ne sont encore renseignés. Ce qui figure ci-dessous
+                — niveau, rattachement, conditions d&apos;admission, sources —
+                est ce dont nous disposons réellement.
+              </p>
+            </div>
+          </div>
+        )}
+
         <nav
           aria-label="Sections de la page"
           className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
@@ -189,6 +228,7 @@ export default async function ProgramPage({
         </nav>
       </div>
 
+      {showPresentation && (
       <Section delay={80} id="presentation" className="scroll-mt-28 flex flex-col gap-4">
         <h2 className="text-xl font-bold sm:text-2xl">Présentation</h2>
         {program.description || program.specialty ? (
@@ -205,13 +245,9 @@ export default async function ProgramPage({
               </div>
             )}
           </div>
-        ) : (
-          <Empty>
-            Aucune présentation n&apos;est encore renseignée pour cette
-            formation.
-          </Empty>
-        )}
+        ) : null}
       </Section>
+      )}
 
       <Section delay={120} id="admission" className="scroll-mt-28 flex flex-col gap-4">
         <h2 className="text-xl font-bold sm:text-2xl">Conditions d&apos;admission</h2>
@@ -289,18 +325,14 @@ export default async function ProgramPage({
         )}
       </Section>
 
+      {showProgramme && (
       <Section delay={160} id="programme" className="scroll-mt-28 flex flex-col gap-4">
         <h2 className="text-xl font-bold sm:text-2xl">Programme</h2>
-        {program.curriculum ? (
-          <p className="leading-relaxed text-muted">{program.curriculum}</p>
-        ) : (
-          <Empty>
-            Le contenu du programme n&apos;est pas encore renseigné pour cette
-            formation.
-          </Empty>
-        )}
+        <p className="leading-relaxed text-muted">{program.curriculum}</p>
       </Section>
+      )}
 
+      {showDebouches && (
       <Section delay={200} id="debouches" className="scroll-mt-28 flex flex-col gap-4">
         <h2 className="text-xl font-bold sm:text-2xl">Débouchés</h2>
         {program.careerProspects || program.furtherStudies ? (
@@ -322,12 +354,9 @@ export default async function ProgramPage({
               </div>
             )}
           </div>
-        ) : (
-          <Empty>
-            Les débouchés ne sont pas encore renseignés pour cette formation.
-          </Empty>
-        )}
+        ) : null}
       </Section>
+      )}
 
       <Section delay={240} id="frais" className="scroll-mt-28 flex flex-col gap-4">
         <h2 className="text-xl font-bold sm:text-2xl">Frais</h2>

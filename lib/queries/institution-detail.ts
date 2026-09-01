@@ -7,6 +7,10 @@ export type DetailProgram = {
   durationYears: number | null;
   degreeAwarded: string | null;
   specialty: string | null;
+  /** Champs rédactionnels : servent uniquement au test de complétude. */
+  description: string | null;
+  curriculum: string | null;
+  careerProspects: string | null;
 };
 
 export type DetailDepartment = {
@@ -80,6 +84,7 @@ const SELECT = `
       id, name, description,
       programs (
         id, name, level, duration_years, degree_awarded, specialty,
+        description, curriculum, career_prospects,
         admission_requirements ( sources ( id, label, url, source_type, status ) ),
         fees ( sources ( id, label, url, source_type, status ) )
       )
@@ -102,6 +107,9 @@ type RawProgram = {
   duration_years: number | null;
   degree_awarded: string | null;
   specialty: string | null;
+  description: string | null;
+  curriculum: string | null;
+  career_prospects: string | null;
   admission_requirements: Array<{ sources: RawSource | null }> | null;
   fees: Array<{ sources: RawSource | null }> | null;
 };
@@ -215,6 +223,9 @@ export async function getInstitutionDetail(
                 durationYears: program.duration_years,
                 degreeAwarded: program.degree_awarded,
                 specialty: program.specialty,
+                description: program.description,
+                curriculum: program.curriculum,
+                careerProspects: program.career_prospects,
               };
             })
             .sort((a, b) => a.name.localeCompare(b.name, "fr")),

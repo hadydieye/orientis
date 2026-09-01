@@ -5,6 +5,10 @@ export type HomeStats = {
   programs: number;
   institutionsWithVerifiedRequirements: number;
   cities: number;
+  /** Institutions sans ville renseignée : comptées, jamais escamotées. */
+  institutionsWithoutCity: number;
+  /** Somme du découpage par ville — doit égaler `institutions`. */
+  mappedInstitutions: number;
 };
 
 export type Category = {
@@ -61,13 +65,22 @@ export async function getHomeData() {
       .order("created_at", { ascending: true }),
   ]);
 
+  // Une institution sans ville ne doit PAS disparaître du décompte : le total
+  // par ville sommait 15 alors que la base en compte 16, et l'écart était
+  // invisible. On la compte à part plutôt que de l'écarter en silence.
   const byCity = new Map<string, number>();
+  let withoutCity = 0;
   for (const row of citiesRows.data ?? []) {
     if (row.city) byCity.set(row.city, (byCity.get(row.city) ?? 0) + 1);
+    else withoutCity += 1;
   }
   const cityCounts: CityCount[] = [...byCity.entries()]
     .map(([city, institutionCount]) => ({ city, institutionCount }))
     .sort((a, b) => a.city.localeCompare(b.city));
+
+  // Contrôle d'intégrité : la somme du découpage doit égaler le total.
+  const mappedInstitutions =
+    cityCounts.reduce((n, c) => n + c.institutionCount, 0) + withoutCity;
 
   type VerifiedRow = {
     programs: { departments: { academic_units: { institution_id: string } } };
@@ -118,6 +131,8 @@ export async function getHomeData() {
     programs: programsCount.count ?? 0,
     institutionsWithVerifiedRequirements: verifiedInstitutions.size,
     cities: byCity.size,
+    institutionsWithoutCity: withoutCity,
+    mappedInstitutions,
   };
 
   return { stats, categories, popularInstitutions, cityCounts };

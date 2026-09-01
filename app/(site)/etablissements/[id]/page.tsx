@@ -7,6 +7,7 @@ import {
   Building2,
   CalendarDays,
   ExternalLink,
+  FileQuestion,
   Globe,
   Landmark,
   Mail,
@@ -17,7 +18,13 @@ import { GlassBadge } from "@/components/ui/GlassBadge";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { Section } from "@/components/home/Section";
 import { ProgramCard } from "@/components/institution/ProgramCard";
+import { ReliabilityBadge } from "@/components/program/SourceReliability";
 import { PhotoGallery } from "@/components/institution/PhotoGallery";
+import {
+  INSTITUTION_INCOMPLETE_MESSAGE,
+  INSTITUTION_INCOMPLETE_TITLE,
+  institutionHasNoStructure,
+} from "@/lib/programs/completeness";
 import { UnitAccordion } from "@/components/institution/UnitAccordion";
 import {
   getInstitutionDetail,
@@ -103,6 +110,10 @@ export default async function InstitutionPage({
   const hasPresentation =
     !!institution.description || facts.length > 0 || contacts.length > 0;
 
+  // Même traitement que les formations sans contenu : la fiche reste publiée,
+  // mais son état est annoncé plutôt que deviné devant des sections vides.
+  const noStructure = institutionHasNoStructure(institution);
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-14 px-4 pb-24 sm:px-6">
       <div className="animate-fade-in-up flex flex-col gap-6">
@@ -162,6 +173,24 @@ export default async function InstitutionPage({
           </div>
         </GlassPanel>
       </div>
+
+      {noStructure && (
+        <div
+          role="status"
+          className="flex items-start gap-3 rounded-card border border-warning/30 bg-warning/10 p-4"
+        >
+          <FileQuestion className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-semibold">{INSTITUTION_INCOMPLETE_TITLE}</p>
+            <p className="text-sm leading-relaxed text-muted">
+              {INSTITUTION_INCOMPLETE_MESSAGE} Les informations ci-dessous se
+              limitent à la présentation de l&apos;établissement et à ses
+              sources. Les filières annoncées n&apos;ont pas encore de structure
+              académique documentée.
+            </p>
+          </div>
+        </div>
+      )}
 
       <Section delay={80} className="flex flex-col gap-5">
         <h2 className="text-xl font-bold sm:text-2xl">Présentation</h2>
@@ -322,8 +351,6 @@ export default async function InstitutionPage({
         ) : (
           <ul className="flex flex-col gap-3">
             {institution.sources.map((source) => {
-              const verified =
-                source.sourceType === "officiel" && source.status === "verifie";
               return (
                 <li
                   key={source.id}
@@ -349,12 +376,9 @@ export default async function InstitutionPage({
                       </a>
                     )}
                   </div>
-                  <GlassBadge
-                    variant={verified ? "success" : "warning"}
-                    className="w-fit shrink-0"
-                  >
-                    {verified ? "Officiel · vérifié" : "Tiers · à vérifier"}
-                  </GlassBadge>
+                  {/* Composant partagé : le vocabulaire de fiabilité n'est
+                      écrit qu'à un seul endroit (lib/labels.ts). */}
+                  <ReliabilityBadge source={source} />
                 </li>
               );
             })}

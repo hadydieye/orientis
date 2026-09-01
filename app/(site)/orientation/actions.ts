@@ -2,6 +2,7 @@
 
 import { createPublicClient } from "@/lib/supabase/public";
 import { computeScore, type Score } from "@/lib/orientation/score";
+import { hasLimitedInfo } from "@/lib/programs/completeness";
 import type { ProgramSource } from "@/lib/queries/program-detail";
 
 /** Préférences facultatives du profil, prises en compte dans le score. */
@@ -21,6 +22,8 @@ export type Recommendation = {
   acceptedSeries: string[] | null;
   source: ProgramSource | null;
   domain: string | null;
+  /** true si la formation n'a aucun contenu rédactionnel (cf. completeness). */
+  limitedInfo: boolean;
   /** Détail du score, recalculé à chaque appel — jamais stocké. */
   score: Score;
 };
@@ -31,6 +34,9 @@ type RawEnriched = {
   level: string;
   domain: string | null;
   duration_years: number | null;
+  description: string | null;
+  curriculum: string | null;
+  career_prospects: string | null;
   departments: {
     academic_units: {
       institutions: { id: string; name: string; city: string | null };
@@ -78,7 +84,7 @@ export async function getRecommendations(
   const { data: enriched, error: enrichError } = await supabase
     .from("programs")
     .select(
-      `id, name, level, domain, duration_years,
+      `id, name, level, domain, duration_years, description, curriculum, career_prospects,
        departments!inner ( academic_units!inner ( institutions!inner ( id, name, city ) ) ),
        admission_requirements ( min_average, accepted_series, sources ( id, label, url, source_type, status ) )`
     )
@@ -116,6 +122,11 @@ export async function getRecommendations(
       level: p.level,
       domain: p.domain,
       durationYears: p.duration_years,
+      limitedInfo: hasLimitedInfo({
+        description: p.description,
+        curriculum: p.curriculum,
+        careerProspects: p.career_prospects,
+      }),
       institution,
       minAverage: matching?.min_average ?? null,
       acceptedSeries: matching?.accepted_series ?? null,

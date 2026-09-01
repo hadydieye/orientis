@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AlertTriangle, BadgeCheck, Loader2, Search } from "lucide-react";
 import { GlassInput } from "@/components/ui/GlassInput";
 import { GlassSelect } from "@/components/ui/GlassSelect";
+import { RELIABILITY_LABEL, isOfficialSource } from "@/lib/labels";
 
 export type FormOption = { value: string; label: string; group?: string; meta?: string };
 
@@ -142,7 +143,7 @@ function SourceReliability({ option }: { option: FormOption | undefined }) {
     );
   }
   const [sourceType, status] = (option.meta ?? "").split("/");
-  const official = sourceType === "officiel" && status === "verifie";
+  const official = isOfficialSource({ sourceType, status });
   return (
     <p
       className={
@@ -156,7 +157,7 @@ function SourceReliability({ option }: { option: FormOption | undefined }) {
       ) : (
         <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
       )}
-      {official ? "Officiel · vérifié" : "Non-officiel, à vérifier"}
+      {official ? RELIABILITY_LABEL.official : RELIABILITY_LABEL.unofficial}
       <span className="font-normal opacity-80">
         ({sourceType || "?"} / {status || "?"})
       </span>
