@@ -1,32 +1,25 @@
 import { createPublicClient } from "@/lib/supabase/public";
+import { TYPE_DIPLOME_ORDER } from "@/lib/labels";
 
 export type DetailProgram = {
   id: string;
   name: string;
-  level: string;
-  durationYears: number | null;
-  degreeAwarded: string | null;
-  specialty: string | null;
-  /** Champs rédactionnels : servent uniquement au test de complétude. */
-  description: string | null;
-  curriculum: string | null;
-  careerProspects: string | null;
+  code: string;
+  typeDiplome: string | null;
+  categorie: string | null;
+  profils: string[];
 };
 
-export type DetailDepartment = {
-  id: string;
-  name: string;
-  description: string | null;
+/**
+ * Les formations d'un établissement, regroupées par type de diplôme.
+ *
+ * Remplace l'ancien regroupement par unité académique puis département :
+ * `programs.department_id` est nul sur les 200 formations ParcourSup, et les
+ * 30 unités académiques n'ont plus aucune formation rattachée.
+ */
+export type DetailProgramGroup = {
+  typeDiplome: string;
   programs: DetailProgram[];
-};
-
-export type DetailUnit = {
-  id: string;
-  name: string;
-  type: string;
-  description: string | null;
-  departments: DetailDepartment[];
-  programCount: number;
 };
 
 export type DetailSource = {
@@ -55,6 +48,7 @@ export type InstitutionPhoto = {
 export type InstitutionDetail = {
   id: string;
   name: string;
+  sigle: string | null;
   type: string;
   status: string;
   description: string | null;
@@ -67,56 +61,21 @@ export type InstitutionDetail = {
   foundedYear: number | null;
   logoUrl: string | null;
   recognitionStatus: string | null;
-  units: DetailUnit[];
+  groups: DetailProgramGroup[];
   programCount: number;
   sources: DetailSource[];
   photos: InstitutionPhoto[];
 };
 
-// Une seule requête : institution → academic_units → departments → programs,
-// avec les sources rattachées aux seuils d'admission et aux frais.
 const SELECT = `
-  id, name, type, status, description, city, commune, address, phone, email,
-  website, founded_year, logo_url, recognition_status,
-  academic_units (
-    id, name, type, description,
-    departments (
-      id, name, description,
-      programs (
-        id, name, level, duration_years, degree_awarded, specialty,
-        description, curriculum, career_prospects,
-        admission_requirements ( sources ( id, label, url, source_type, status ) ),
-        fees ( sources ( id, label, url, source_type, status ) )
-      )
-    )
-  )
+  id, name, sigle, type, status, description, city, commune, address, phone,
+  email, website, founded_year, logo_url, recognition_status
 `;
-
-type RawSource = {
-  id: string;
-  label: string;
-  url: string | null;
-  source_type: string;
-  status: string;
-};
-
-type RawProgram = {
-  id: string;
-  name: string;
-  level: string;
-  duration_years: number | null;
-  degree_awarded: string | null;
-  specialty: string | null;
-  description: string | null;
-  curriculum: string | null;
-  career_prospects: string | null;
-  admission_requirements: Array<{ sources: RawSource | null }> | null;
-  fees: Array<{ sources: RawSource | null }> | null;
-};
 
 type RawInstitution = {
   id: string;
   name: string;
+  sigle: string | null;
   type: string;
   status: string;
   description: string | null;
@@ -129,18 +88,27 @@ type RawInstitution = {
   founded_year: number | null;
   logo_url: string | null;
   recognition_status: string | null;
-  academic_units: Array<{
+};
+
+type RawLink = {
+  programs: {
     id: string;
     name: string;
-    type: string;
-    description: string | null;
-    departments: Array<{
-      id: string;
-      name: string;
-      description: string | null;
-      programs: RawProgram[];
-    }>;
-  }>;
+    code: string;
+    type_diplome_enum: string | null;
+    categorie: string | null;
+    program_profils: Array<{ profil: string }> | null;
+    admission_requirements: Array<{ sources: RawSource | null }> | null;
+    fees: Array<{ sources: RawSource | null }> | null;
+  } | null;
+};
+
+type RawSource = {
+  id: string;
+  label: string;
+  url: string | null;
+  source_type: string;
+  status: string;
 };
 
 export async function getInstitutionIds() {
@@ -161,6 +129,21 @@ export async function getInstitutionDetail(
     .maybeSingle();
 
   if (error || !data) return null;
+
+  // Formations rattachées via la table de liaison N-N. Requête séparée de la
+  // fiche : une formation peut appartenir à plusieurs établissements, et
+  // l'imbriquer dans le SELECT ci-dessus rendrait la déduplication illisible.
+  const { data: linkRows } = await supabase
+    .from("program_institutions")
+    .select(
+      `programs (
+         id, name, code, type_diplome_enum, categorie,
+         program_profils ( profil ),
+         admission_requirements ( sources ( id, label, url, source_type, status ) ),
+         fees ( sources ( id, label, url, source_type, status ) )
+       )`
+    )
+    .eq("institution_id", id);
 
   // Requête séparée plutôt qu'imbriquée dans SELECT : la policy public_read
   // d'institution_photos exige à la fois la photo approuvée et son
@@ -191,73 +174,69 @@ export async function getInstitutionDetail(
   const raw = data as unknown as RawInstitution;
   const sources = new Map<string, DetailSource>();
 
-  const units: DetailUnit[] = (raw.academic_units ?? [])
-    .map((unit) => {
-      const departments: DetailDepartment[] = (unit.departments ?? [])
-        .map((dept) => ({
-          id: dept.id,
-          name: dept.name,
-          description: dept.description,
-          programs: (dept.programs ?? [])
-            .map((program) => {
-              for (const link of [
-                ...(program.admission_requirements ?? []),
-                ...(program.fees ?? []),
-              ]) {
-                if (link.sources) {
-                  sources.set(link.sources.id, {
-                    id: link.sources.id,
-                    label: link.sources.label,
-                    url: link.sources.url,
-                    sourceType: link.sources.source_type,
-                    status: link.sources.status,
-                    origin: "donnees",
-                    note: null,
-                  });
-                }
-              }
-              return {
-                id: program.id,
-                name: program.name,
-                level: program.level,
-                durationYears: program.duration_years,
-                degreeAwarded: program.degree_awarded,
-                specialty: program.specialty,
-                description: program.description,
-                curriculum: program.curriculum,
-                careerProspects: program.career_prospects,
-              };
-            })
-            .sort((a, b) => a.name.localeCompare(b.name, "fr")),
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  const programs: DetailProgram[] = ((linkRows ?? []) as unknown as RawLink[])
+    .map((link) => link.programs)
+    .filter((p): p is NonNullable<RawLink["programs"]> => Boolean(p))
+    .map((program) => {
+      for (const row of [
+        ...(program.admission_requirements ?? []),
+        ...(program.fees ?? []),
+      ]) {
+        if (row.sources) {
+          sources.set(row.sources.id, {
+            id: row.sources.id,
+            label: row.sources.label,
+            url: row.sources.url,
+            sourceType: row.sources.source_type,
+            status: row.sources.status,
+            origin: "donnees",
+            note: null,
+          });
+        }
+      }
 
       return {
-        id: unit.id,
-        name: unit.name,
-        type: unit.type,
-        description: unit.description,
-        departments,
-        programCount: departments.reduce((n, d) => n + d.programs.length, 0),
+        id: program.id,
+        name: program.name,
+        code: program.code,
+        typeDiplome: program.type_diplome_enum,
+        categorie: program.categorie,
+        profils: (program.program_profils ?? []).map((p) => p.profil),
       };
-    })
-    // Les unités les plus fournies d'abord : la page reste lisible même
-    // quand l'établissement en compte cinq (cas UGANC).
-    .sort(
-      (a, b) => b.programCount - a.programCount || a.name.localeCompare(b.name, "fr")
-    );
+    });
+
+  // Regroupement par type de diplôme, dans l'ordre de lecture de référence.
+  const byType = new Map<string, DetailProgram[]>();
+  for (const program of programs) {
+    // `type_diplome_enum` est nullable en base ; un libellé de repli vaut
+    // mieux qu'un groupe sans titre.
+    const key = program.typeDiplome ?? "Autre";
+    byType.set(key, [...(byType.get(key) ?? []), program]);
+  }
+
+  const groups: DetailProgramGroup[] = [...byType.entries()]
+    .map(([typeDiplome, list]) => ({
+      typeDiplome,
+      programs: list.sort((a, b) => a.name.localeCompare(b.name, "fr")),
+    }))
+    .sort((a, b) => {
+      const ia = TYPE_DIPLOME_ORDER.indexOf(
+        a.typeDiplome as (typeof TYPE_DIPLOME_ORDER)[number]
+      );
+      const ib = TYPE_DIPLOME_ORDER.indexOf(
+        b.typeDiplome as (typeof TYPE_DIPLOME_ORDER)[number]
+      );
+      return (
+        (ia === -1 ? TYPE_DIPLOME_ORDER.length : ia) -
+        (ib === -1 ? TYPE_DIPLOME_ORDER.length : ib)
+      );
+    });
 
   // Les liaisons directes sont fusionnées APRÈS le parcours des programmes :
   // une source déjà vue via un seuil ou des frais est requalifiée en
   // "etablissement", le rattachement explicite étant l'information la plus
   // forte des deux.
-  type LinkedRow = {
-    note: string | null;
-    sources: {
-      id: string; label: string; url: string | null;
-      source_type: string; status: string;
-    } | null;
-  };
+  type LinkedRow = { note: string | null; sources: RawSource | null };
   for (const link of (linkedRows ?? []) as unknown as LinkedRow[]) {
     if (!link.sources) continue;
     sources.set(link.sources.id, {
@@ -274,6 +253,7 @@ export async function getInstitutionDetail(
   return {
     id: raw.id,
     name: raw.name,
+    sigle: raw.sigle,
     type: raw.type,
     status: raw.status,
     description: raw.description,
@@ -286,9 +266,9 @@ export async function getInstitutionDetail(
     foundedYear: raw.founded_year,
     logoUrl: raw.logo_url,
     recognitionStatus: raw.recognition_status,
-    units,
+    groups,
     photos,
-    programCount: units.reduce((n, u) => n + u.programCount, 0),
+    programCount: programs.length,
     sources: [...sources.values()].sort(
       (a, b) =>
         Number(b.origin === "etablissement") - Number(a.origin === "etablissement") ||

@@ -42,9 +42,9 @@ export default async function AdminProgramsPage({
         <TableShell>
           <HeadRow>
             <Th>Nom</Th>
-            <Th>Département</Th>
-            <Th>Établissement</Th>
-            <Th>Niveau</Th>
+            <Th>Code</Th>
+            <Th>Établissements</Th>
+            <Th>Type de diplôme</Th>
             <Th>Statut</Th>
             <Th align="right">Actions</Th>
           </HeadRow>
@@ -52,9 +52,11 @@ export default async function AdminProgramsPage({
             {rows.map((p) => (
               <tr key={p.id} className="border-b border-glass-border last:border-0">
                 <td className="px-4 py-3">{p.name}</td>
-                <td className="px-4 py-3 text-muted">{p.departmentName}</td>
+                <td className="px-4 py-3 text-muted tabular-nums">{p.code}</td>
                 <td className="px-4 py-3 text-muted">{p.institutionName}</td>
-                <td className="px-4 py-3 text-muted">{LEVEL_LABEL[p.level] ?? p.level}</td>
+                <td className="px-4 py-3 text-muted">
+                  {p.typeDiplome ?? LEVEL_LABEL[p.level] ?? p.level}
+                </td>
                 <td className="px-4 py-3"><ReviewBadge status={p.reviewStatus} /></td>
                 <td className="px-4 py-3">
                   <RowActions

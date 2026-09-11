@@ -1,30 +1,24 @@
 import {
-  Atom,
-  Briefcase,
-  Gavel,
-  Languages,
-  Leaf,
   Cog,
+  GraduationCap,
   Landmark,
-  Users,
   Stethoscope,
+  Wrench,
   BookOpen,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import type { Category } from "@/lib/queries/home";
 
-// Association mot-clé → icône, évaluée dans l'ordre.
+// Association mot-clé → icône, évaluée dans l'ordre. Les catégories sont
+// désormais les six types de diplôme de ParcourSup Guinée.
 const ICON_RULES: Array<[RegExp, LucideIcon]> = [
-  [/économiq|gestion|commerce|comptab/i, Briefcase],
-  [/juridiq|droit/i, Gavel],
-  [/lettres|langage|langue/i, Languages],
-  [/agronom|vétérinaire|agricole|environnement/i, Leaf],
-  [/polytechn|technolog|mines|génie|industri/i, Cog],
-  [/médecine|santé|pharmac/i, Stethoscope],
-  [/éducation|pédagog/i, BookOpen],
-  [/social/i, Users],
-  [/science/i, Atom],
+  [/ingénieur/i, Cog],
+  [/état/i, Stethoscope],
+  [/professionnelle/i, Wrench],
+  [/fondamentale/i, GraduationCap],
+  [/dut/i, Wrench],
+  [/préparatoire/i, BookOpen],
 ];
 
 function iconFor(name: string): LucideIcon {

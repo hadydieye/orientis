@@ -25,11 +25,11 @@ export default async function Home() {
       <Section delay={160} className="flex flex-col gap-6">
         <div>
           <h2 className="text-2xl font-bold sm:text-3xl">
-            Explorer par catégorie
+            Explorer par type de diplôme
           </h2>
           <p className="mt-2 text-sm text-muted sm:text-base">
-            Les filières les mieux représentées dans le catalogue, par unité de
-            rattachement.
+            Les six types de diplôme du catalogue, du cycle préparatoire au
+            diplôme d&apos;État.
           </p>
         </div>
         <CategoryGrid categories={categories} />

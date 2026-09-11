@@ -7,7 +7,8 @@
     "build": "rm -rf .next/cache && next build",
     "start": "next start",
     "lint": "eslint",
-    "generate:map": "node scripts/generate-guinea-map.mjs"
+    "generate:map": "node scripts/generate-guinea-map.mjs",
+    "import:parcoursup": "tsx scripts/import-parcoursup-2026.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
@@ -27,6 +28,7 @@
     "eslint-config-next": "16.3.3",
     "tailwindcss": "^4",
     "topojson-client": "^3.1.0",
+    "tsx": "^4.23.13",
     "typescript": "^5",
     "world-atlas": "^2.0.2"
   }

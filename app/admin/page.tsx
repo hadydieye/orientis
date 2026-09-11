@@ -48,7 +48,6 @@ export default async function AdminOverviewPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Stat label="Établissements" value={c.institutions} />
           <Stat label="Unités académiques" value={c.academicUnits} />
-          <Stat label="Départements" value={c.departments} />
           <Stat label="Formations" value={c.programs} />
           <Stat label="Conditions d'admission" value={c.admissionRequirements} />
           <Stat label="Frais" value={c.fees} />

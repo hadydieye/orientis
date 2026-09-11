@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  Briefcase,
+  Building2,
   ChevronRight,
   ExternalLink,
-  FileQuestion,
   GraduationCap,
+  Hash,
   Languages,
   MapPin,
-  Timer,
+  Users,
 } from "lucide-react";
 import { GlassBadge } from "@/components/ui/GlassBadge";
 import { GlassPanel } from "@/components/ui/GlassPanel";
@@ -18,15 +20,9 @@ import {
   ReliabilityTag,
 } from "@/components/program/SourceReliability";
 import {
-  LIMITED_INFO_MESSAGE,
-  LIMITED_INFO_TITLE,
-  hasLimitedInfo,
-} from "@/lib/programs/completeness";
-import {
   FEE_TYPE_LABEL,
   FREQUENCY_LABEL,
-  LANGUAGE_LABEL,
-  LEVEL_LABEL,
+  PROFIL_LABEL,
 } from "@/lib/labels";
 import { getProgramDetail, getProgramIds } from "@/lib/queries/program-detail";
 
@@ -45,13 +41,20 @@ export async function generateMetadata({
   const { id } = await params;
   const program = await getProgramDetail(id);
   if (!program) return { title: "Formation introuvable" };
+
+  // Une formation peut être proposée par plusieurs établissements, ou aucun :
+  // le titre s'adapte plutôt que de supposer un établissement unique.
+  const sigles = program.institutions
+    .map((i) => i.sigle ?? i.name)
+    .join(", ");
+
   return {
-    title: `${program.name} — ${program.institution.name}`,
+    title: sigles ? `${program.name} — ${sigles}` : program.name,
     description:
       program.description ??
-      `${program.name} à ${program.institution.name}${
-        program.institution.city ? `, ${program.institution.city}` : ""
-      }.`,
+      [program.typeDiplome, program.name, sigles && `proposée par ${sigles}`]
+        .filter(Boolean)
+        .join(" · "),
   };
 }
 
@@ -60,6 +63,25 @@ function Empty({ children }: { children: React.ReactNode }) {
     <p className="rounded-card border border-glass-border bg-glass-1 p-5 text-sm text-muted">
       {children}
     </p>
+  );
+}
+
+/** Liste ordonnée et numérotée : l'ordre vient de la source officielle. */
+function OrderedList({ items }: { items: string[] }) {
+  return (
+    <ol className="flex flex-col gap-2">
+      {items.map((item, index) => (
+        <li
+          key={`${index}-${item}`}
+          className="flex gap-3 rounded-card border border-glass-border bg-glass-1 p-4"
+        >
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-pill border border-glass-border bg-glass-2 text-xs font-semibold tabular-nums">
+            {index + 1}
+          </span>
+          <span className="text-sm leading-relaxed text-muted">{item}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -75,46 +97,31 @@ export default async function ProgramPage({
 
   // Uniquement les champs réellement renseignés — pas de tiret ni de "N/A".
   const quickFacts = [
-    { icon: GraduationCap, label: LEVEL_LABEL[program.level] ?? program.level },
-    program.durationYears !== null && {
-      icon: Timer,
-      label: `${program.durationYears} an${program.durationYears > 1 ? "s" : ""}`,
-    },
-    // degree_awarded vaut souvent exactement le libellé du niveau
-    // ("Licence" / "Licence") : on ne l'affiche que s'il apporte autre chose.
-    program.degreeAwarded &&
-      program.degreeAwarded !== (LEVEL_LABEL[program.level] ?? program.level) && {
-        icon: GraduationCap,
-        label: program.degreeAwarded,
-      },
-    {
-      icon: Languages,
-      label: LANGUAGE_LABEL[program.language] ?? program.language,
-    },
-  ].filter(Boolean) as Array<{ icon: typeof Timer; label: string }>;
+    program.typeDiplome && { icon: GraduationCap, label: program.typeDiplome },
+    { icon: Hash, label: program.code },
+    { icon: Languages, label: "Français" },
+  ].filter(Boolean) as Array<{ icon: typeof Hash; label: string }>;
 
-  // Une section rédactionnelle n'est masquée que si elle est RÉELLEMENT vide.
-  // `specialty` et `furtherStudies` peuvent porter du contenu alors que les
-  // trois champs principaux sont vides : les masquer perdrait de l'information.
-  const showPresentation = Boolean(program.description || program.specialty);
+  // Les champs rédactionnels ne sont pas fournis par ParcourSup ; ils peuvent
+  // être saisis à la main. Chaque section n'apparaît que si elle a du contenu.
+  const showPresentation = Boolean(program.description);
   const showProgramme = Boolean(program.curriculum);
   const showDebouches = Boolean(program.careerProspects || program.furtherStudies);
 
-  // Le bandeau ne dépend que des trois champs rédactionnels (définition
-  // partagée avec les cartes de liste et de recommandation).
-  const limitedInfo = hasLimitedInfo({
-    description: program.description,
-    curriculum: program.curriculum,
-    careerProspects: program.careerProspects,
-  });
-
   const sections = [
     ...(showPresentation ? [{ id: "presentation", label: "Présentation" }] : []),
-    { id: "admission", label: "Conditions d'admission" },
+    { id: "etablissements", label: "Établissements" },
+    ...(program.competences.length > 0
+      ? [{ id: "competences", label: "Compétences" }]
+      : []),
+    ...(program.metiers.length > 0 ? [{ id: "metiers", label: "Métiers" }] : []),
+    ...(program.secteurs.length > 0
+      ? [{ id: "secteurs", label: "Secteurs" }]
+      : []),
     ...(showProgramme ? [{ id: "programme", label: "Programme" }] : []),
     ...(showDebouches ? [{ id: "debouches", label: "Débouchés" }] : []),
+    { id: "admission", label: "Conditions d'admission" },
     { id: "frais", label: "Frais" },
-    { id: "inscription", label: "Inscription" },
     { id: "sources", label: "Sources" },
   ];
 
@@ -140,10 +147,10 @@ export default async function ProgramPage({
                 Formations
               </Link>
             </li>
-            {program.domain && (
+            {program.categorie && (
               <>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                <li>{program.domain}</li>
+                <li>{program.categorie}</li>
               </>
             )}
             <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -154,32 +161,48 @@ export default async function ProgramPage({
         </nav>
 
         <GlassPanel variant="2" className="p-6 sm:p-8">
-          <GlassBadge variant="neutral">
-            {LEVEL_LABEL[program.level] ?? program.level}
-          </GlassBadge>
+          <div className="flex flex-wrap items-center gap-2">
+            {program.typeDiplome && (
+              <GlassBadge variant="neutral">{program.typeDiplome}</GlassBadge>
+            )}
+            {program.categorie && (
+              <GlassBadge variant="neutral">{program.categorie}</GlassBadge>
+            )}
+          </div>
 
           <h1 className="mt-4 text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
             {program.name}
           </h1>
 
-          <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-            <Link
-              href={`/etablissements/${program.institution.id}`}
-              className="rounded text-secondary outline-none transition-opacity duration-150 ease-out hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              {program.institution.name}
-            </Link>
-            {program.institution.city && (
-              <span className="inline-flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" aria-hidden />
-                {program.institution.city}
-              </span>
-            )}
-          </p>
+          {program.institutions.length > 0 && (
+            <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+              {program.institutions.map((institution, index) => (
+                <span key={institution.id} className="inline-flex items-center gap-2">
+                  {index > 0 && <span aria-hidden>·</span>}
+                  <Link
+                    href={`/etablissements/${institution.id}`}
+                    className="rounded text-secondary outline-none transition-opacity duration-150 ease-out hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    {institution.sigle ?? institution.name}
+                  </Link>
+                </span>
+              ))}
+            </p>
+          )}
 
-          <p className="mt-1 text-xs text-muted-dark">
-            {program.unit.name} · {program.department.name}
-          </p>
+          {program.profils.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 text-sm text-muted">
+                <Users className="h-3.5 w-3.5" aria-hidden />
+                Profils acceptés
+              </span>
+              {program.profils.map((profil) => (
+                <GlassBadge key={profil} variant="neutral">
+                  {PROFIL_LABEL[profil] ?? profil}
+                </GlassBadge>
+              ))}
+            </div>
+          )}
 
           <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-3 border-t border-glass-border pt-5">
             {quickFacts.map((fact, i) => (
@@ -192,25 +215,20 @@ export default async function ProgramPage({
               </li>
             ))}
           </ul>
-        </GlassPanel>
 
-        {limitedInfo && (
-          <div
-            role="status"
-            className="flex items-start gap-3 rounded-card border border-warning/30 bg-warning/10 p-4"
-          >
-            <FileQuestion className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-semibold">{LIMITED_INFO_TITLE}</p>
-              <p className="text-sm leading-relaxed text-muted">
-                {LIMITED_INFO_MESSAGE} Ni présentation, ni contenu de programme,
-                ni débouchés ne sont encore renseignés. Ce qui figure ci-dessous
-                — niveau, rattachement, conditions d&apos;admission, sources —
-                est ce dont nous disposons réellement.
-              </p>
-            </div>
-          </div>
-        )}
+          {program.urlSource && (
+            <a
+              href={program.urlSource}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex w-fit items-center gap-1.5 rounded text-sm text-secondary outline-none transition-opacity duration-150 ease-out hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              Fiche officielle sur ParcourSup Guinée
+              {program.anneeSource ? ` (${program.anneeSource})` : ""}
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+            </a>
+          )}
+        </GlassPanel>
 
         <nav
           aria-label="Sections de la page"
@@ -229,31 +247,159 @@ export default async function ProgramPage({
       </div>
 
       {showPresentation && (
-      <Section delay={80} id="presentation" className="scroll-mt-28 flex flex-col gap-4">
-        <h2 className="text-xl font-bold sm:text-2xl">Présentation</h2>
-        {program.description || program.specialty ? (
-          <div className="flex flex-col gap-4">
-            {program.description && (
-              <p className="leading-relaxed text-muted">{program.description}</p>
-            )}
-            {program.specialty && (
+        <Section delay={80} id="presentation" className="scroll-mt-28 flex flex-col gap-4">
+          <h2 className="text-xl font-bold sm:text-2xl">Présentation</h2>
+          <p className="leading-relaxed text-muted">{program.description}</p>
+        </Section>
+      )}
+
+      <Section delay={120} id="etablissements" className="scroll-mt-28 flex flex-col gap-4">
+        <h2 className="text-xl font-bold sm:text-2xl">
+          Où suivre cette formation
+        </h2>
+
+        {program.institutions.length === 0 ? (
+          // Cas réel et non exceptionnel : les 2 cycles préparatoires sont
+          // publiés sous le sigle CPGE, qui ne désigne aucun établissement
+          // nommé dans la source officielle.
+          <Empty>
+            Aucun établissement n&apos;est rattaché à cette formation dans les
+            données officielles. Elle y figure sous une désignation générique,
+            sans établissement nommé.
+          </Empty>
+        ) : (
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {program.institutions.map((institution) => (
+              <li key={institution.id}>
+                <Link
+                  href={`/etablissements/${institution.id}`}
+                  className="flex h-full flex-col gap-1.5 rounded-card border border-glass-border bg-glass-1 p-4 outline-none transition-colors duration-200 ease-out hover:border-glass-border-hover focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <span className="flex items-start gap-2 font-medium leading-snug">
+                    <Building2 className="mt-0.5 h-4 w-4 shrink-0 text-muted" aria-hidden />
+                    {institution.name}
+                  </span>
+                  <span className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-6 text-sm text-muted">
+                    {institution.sigle && <span>{institution.sigle}</span>}
+                    {institution.city && (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5" aria-hidden />
+                        {institution.city}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      {program.competences.length > 0 && (
+        <Section delay={160} id="competences" className="scroll-mt-28 flex flex-col gap-4">
+          <h2 className="text-xl font-bold sm:text-2xl">
+            Compétences visées
+          </h2>
+          <p className="text-sm text-muted-dark">
+            {program.competences.length} compétence
+            {program.competences.length > 1 ? "s" : ""} terminale
+            {program.competences.length > 1 ? "s" : ""}, dans l&apos;ordre de la
+            fiche officielle.
+          </p>
+          <OrderedList items={program.competences} />
+        </Section>
+      )}
+
+      {program.metiers.length > 0 && (
+        <Section delay={200} id="metiers" className="scroll-mt-28 flex flex-col gap-4">
+          <h2 className="text-xl font-bold sm:text-2xl">Métiers accessibles</h2>
+          <ul className="flex flex-wrap gap-2">
+            {program.metiers.map((metier, index) => (
+              <li
+                key={`${index}-${metier}`}
+                className="flex items-center gap-2 rounded-pill border border-glass-border bg-glass-1 px-3.5 py-1.5 text-sm text-muted"
+              >
+                <Briefcase className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                {metier}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {program.secteurs.length > 0 && (
+        <Section delay={240} id="secteurs" className="scroll-mt-28 flex flex-col gap-4">
+          <h2 className="text-xl font-bold sm:text-2xl">
+            Secteurs et employeurs
+          </h2>
+          <div className="flex flex-col gap-3">
+            {program.secteurs.map((secteur) => (
+              <div
+                key={secteur.id}
+                className="flex flex-col gap-3 rounded-card border border-glass-border bg-glass-1 p-5"
+              >
+                {/* `nom` est nullable en base : on n'invente pas de titre. */}
+                {secteur.nom && (
+                  <h3 className="font-medium leading-snug">{secteur.nom}</h3>
+                )}
+                {secteur.employeurs.length > 0 && (
+                  <ul className="flex flex-wrap gap-2">
+                    {secteur.employeurs.map((employeur, index) => (
+                      <li
+                        key={`${index}-${employeur}`}
+                        className="rounded-pill border border-glass-border bg-glass-2 px-3 py-1 text-xs text-muted"
+                      >
+                        {employeur}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {showProgramme && (
+        <Section delay={280} id="programme" className="scroll-mt-28 flex flex-col gap-4">
+          <h2 className="text-xl font-bold sm:text-2xl">Programme</h2>
+          <p className="leading-relaxed text-muted">{program.curriculum}</p>
+        </Section>
+      )}
+
+      {showDebouches && (
+        <Section delay={300} id="debouches" className="scroll-mt-28 flex flex-col gap-4">
+          <h2 className="text-xl font-bold sm:text-2xl">Débouchés</h2>
+          <div className="flex flex-col gap-5">
+            {program.careerProspects && (
               <div>
-                <h3 className="text-sm font-medium">Spécialités possibles</h3>
+                <h3 className="text-sm font-medium">Débouchés professionnels</h3>
                 <p className="mt-1 leading-relaxed text-muted">
-                  {program.specialty}
+                  {program.careerProspects}
+                </p>
+              </div>
+            )}
+            {program.furtherStudies && (
+              <div>
+                <h3 className="text-sm font-medium">Poursuite d&apos;études</h3>
+                <p className="mt-1 leading-relaxed text-muted">
+                  {program.furtherStudies}
                 </p>
               </div>
             )}
           </div>
-        ) : null}
-      </Section>
+        </Section>
       )}
 
-      <Section delay={120} id="admission" className="scroll-mt-28 flex flex-col gap-4">
+      <Section delay={320} id="admission" className="scroll-mt-28 flex flex-col gap-4">
         <h2 className="text-xl font-bold sm:text-2xl">Conditions d&apos;admission</h2>
 
         {program.admissions.length === 0 ? (
-          <Empty>Conditions non renseignées pour cette formation.</Empty>
+          <Empty>
+            Les données officielles ParcourSup Guinée ne publient pas de
+            conditions chiffrées — ni moyenne minimale, ni série requise
+            au-delà du profil d&apos;entrée indiqué plus haut.
+          </Empty>
         ) : (
           program.admissions.map((admission) => (
             <div
@@ -325,40 +471,7 @@ export default async function ProgramPage({
         )}
       </Section>
 
-      {showProgramme && (
-      <Section delay={160} id="programme" className="scroll-mt-28 flex flex-col gap-4">
-        <h2 className="text-xl font-bold sm:text-2xl">Programme</h2>
-        <p className="leading-relaxed text-muted">{program.curriculum}</p>
-      </Section>
-      )}
-
-      {showDebouches && (
-      <Section delay={200} id="debouches" className="scroll-mt-28 flex flex-col gap-4">
-        <h2 className="text-xl font-bold sm:text-2xl">Débouchés</h2>
-        {program.careerProspects || program.furtherStudies ? (
-          <div className="flex flex-col gap-5">
-            {program.careerProspects && (
-              <div>
-                <h3 className="text-sm font-medium">Débouchés professionnels</h3>
-                <p className="mt-1 leading-relaxed text-muted">
-                  {program.careerProspects}
-                </p>
-              </div>
-            )}
-            {program.furtherStudies && (
-              <div>
-                <h3 className="text-sm font-medium">Poursuite d&apos;études</h3>
-                <p className="mt-1 leading-relaxed text-muted">
-                  {program.furtherStudies}
-                </p>
-              </div>
-            )}
-          </div>
-        ) : null}
-      </Section>
-      )}
-
-      <Section delay={240} id="frais" className="scroll-mt-28 flex flex-col gap-4">
+      <Section delay={360} id="frais" className="scroll-mt-28 flex flex-col gap-4">
         <h2 className="text-xl font-bold sm:text-2xl">Frais</h2>
         {program.fees.length === 0 ? (
           <Empty>
@@ -395,112 +508,58 @@ export default async function ProgramPage({
         )}
       </Section>
 
-      <Section delay={280} id="inscription" className="scroll-mt-28 flex flex-col gap-4">
-        <h2 className="text-xl font-bold sm:text-2xl">Inscription</h2>
+      <Section delay={400} id="sources" className="scroll-mt-28 flex flex-col gap-4">
+        <h2 className="text-xl font-bold sm:text-2xl">Sources</h2>
 
-        {program.procedures.every((p) => p.steps.length === 0) &&
-        program.documents.length === 0 ? (
-          <Empty>
-            La procédure d&apos;inscription n&apos;est pas encore documentée
-            pour cette formation.
-          </Empty>
-        ) : (
-          <div className="flex flex-col gap-6">
-            {program.procedures.map((procedure) => (
-              <ol key={procedure.id} className="flex flex-col gap-3">
-                {procedure.steps.map((step) => (
-                  <li
-                    key={step.id}
-                    className="flex gap-4 rounded-card border border-glass-border bg-glass-1 p-4"
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-pill border border-glass-border bg-glass-2 text-xs font-semibold tabular-nums">
-                      {step.stepNumber}
-                    </span>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium leading-snug">
-                        {step.title}
-                      </span>
-                      {step.description && (
-                        <p className="text-sm text-muted">{step.description}</p>
-                      )}
-                      {step.deadline && (
-                        <p className="text-xs text-muted-dark">
-                          Échéance : {step.deadline}
-                        </p>
-                      )}
-                      {step.link && (
-                        <a
-                          href={step.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex w-fit items-center gap-1 text-xs text-secondary hover:opacity-80"
-                        >
-                          Ouvrir le lien
-                          <ExternalLink className="h-3 w-3" aria-hidden />
-                        </a>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            ))}
-
-            {program.documents.length > 0 && (
-              <div>
-                <h3 className="text-sm font-medium">Pièces à fournir</h3>
-                <ul className="mt-2 flex flex-col gap-2">
-                  {program.documents.map((doc) => (
-                    <li
-                      key={doc.id}
-                      className="flex flex-wrap items-center gap-2 text-sm text-muted"
-                    >
-                      <span>{doc.name}</span>
-                      <GlassBadge variant="neutral">
-                        {doc.originalOrCopy}
-                      </GlassBadge>
-                      {doc.isMandatory && (
-                        <GlassBadge variant="neutral">Obligatoire</GlassBadge>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+        {program.urlSource && (
+          <div className="flex flex-col gap-2 rounded-card border border-glass-border bg-glass-1 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm leading-snug">
+                ParcourSup Guinée — Ministère de l&apos;Enseignement Supérieur
+              </span>
+              <a
+                href={program.urlSource}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-fit items-center gap-1 rounded text-xs text-secondary outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                Consulter la fiche officielle
+                <ExternalLink className="h-3 w-3" aria-hidden />
+              </a>
+            </div>
+            <ReliabilityBadge
+              source={{ sourceType: "officiel", status: "verifie" }}
+            />
           </div>
         )}
-      </Section>
 
-      <Section delay={320} id="sources" className="scroll-mt-28 flex flex-col gap-4">
-        <h2 className="text-xl font-bold sm:text-2xl">Sources</h2>
-        {program.sources.length === 0 ? (
+        {program.sources.map((source) => (
+          <div
+            key={source.id}
+            className="flex flex-col gap-2 rounded-card border border-glass-border bg-glass-1 p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex flex-col gap-1">
+              <span className="text-sm leading-snug">{source.label}</span>
+              {source.url && (
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-fit items-center gap-1 rounded text-xs text-secondary outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  Consulter la source
+                  <ExternalLink className="h-3 w-3" aria-hidden />
+                </a>
+              )}
+            </div>
+            <ReliabilityBadge source={source} />
+          </div>
+        ))}
+
+        {!program.urlSource && program.sources.length === 0 && (
           <Empty>
             Aucune source n&apos;est rattachée aux données de cette formation.
           </Empty>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {program.sources.map((source) => (
-              <li
-                key={source.id}
-                className="flex flex-col gap-2 rounded-card border border-glass-border bg-glass-1 p-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm leading-snug">{source.label}</span>
-                  {source.url && (
-                    <a
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex w-fit items-center gap-1 rounded text-xs text-secondary outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
-                    >
-                      Consulter la source
-                      <ExternalLink className="h-3 w-3" aria-hidden />
-                    </a>
-                  )}
-                </div>
-                <ReliabilityBadge source={source} />
-              </li>
-            ))}
-          </ul>
         )}
       </Section>
     </main>

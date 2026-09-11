@@ -7,7 +7,6 @@ import {
   GraduationCap,
   LayoutGrid,
   Library,
-  Network,
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -25,7 +24,6 @@ export const ADMIN_NAV: Item[] = [
   { href: "/admin", label: "Vue d'ensemble", icon: LayoutGrid, ready: true },
   { href: "/admin/institutions", label: "Établissements", icon: Building2, ready: true },
   { href: "/admin/unites", label: "Unités académiques", icon: Library, ready: true },
-  { href: "/admin/departements", label: "Départements", icon: Network, ready: true },
   { href: "/admin/formations", label: "Formations", icon: GraduationCap, ready: true },
   { href: "/admin/admissions", label: "Conditions d'admission", icon: ClipboardCheck, ready: true },
   { href: "/admin/frais", label: "Frais", icon: Banknote, ready: true },

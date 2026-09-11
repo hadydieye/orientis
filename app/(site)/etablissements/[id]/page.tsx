@@ -7,7 +7,6 @@ import {
   Building2,
   CalendarDays,
   ExternalLink,
-  FileQuestion,
   Globe,
   Landmark,
   Mail,
@@ -20,12 +19,7 @@ import { Section } from "@/components/home/Section";
 import { ProgramCard } from "@/components/institution/ProgramCard";
 import { ReliabilityBadge } from "@/components/program/SourceReliability";
 import { PhotoGallery } from "@/components/institution/PhotoGallery";
-import {
-  INSTITUTION_INCOMPLETE_MESSAGE,
-  INSTITUTION_INCOMPLETE_TITLE,
-  institutionHasNoStructure,
-} from "@/lib/programs/completeness";
-import { UnitAccordion } from "@/components/institution/UnitAccordion";
+import { INSTITUTION_STATUS_LABEL, INSTITUTION_TYPE_LABEL } from "@/lib/labels";
 import {
   getInstitutionDetail,
   getInstitutionIds,
@@ -33,18 +27,12 @@ import {
 
 export const revalidate = 3600;
 
-// Les 15 établissements sont connus à l'avance et bougent rarement :
+// Les 17 établissements sont connus à l'avance et bougent rarement :
 // on prérend chaque fiche au build.
 export async function generateStaticParams() {
   const ids = await getInstitutionIds();
   return ids.map((id) => ({ id }));
 }
-
-const STATUS_LABEL: Record<string, string> = {
-  universite: "Université",
-  institut: "Institut",
-  ecole: "École",
-};
 
 export async function generateMetadata({
   params,
@@ -110,10 +98,6 @@ export default async function InstitutionPage({
   const hasPresentation =
     !!institution.description || facts.length > 0 || contacts.length > 0;
 
-  // Même traitement que les formations sans contenu : la fiche reste publiée,
-  // mais son état est annoncé plutôt que deviné devant des sections vides.
-  const noStructure = institutionHasNoStructure(institution);
-
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-14 px-4 pb-24 sm:px-6">
       <div className="animate-fade-in-up flex flex-col gap-6">
@@ -147,19 +131,25 @@ export default async function InstitutionPage({
                 {institution.name}
               </h1>
 
+              {/* Un champ nul ne produit aucune ligne : `filter(Boolean)`
+                  écarte le sigle, la ville ou le statut manquants. */}
               <p className="text-sm text-muted">
                 {[
-                  institution.type === "public" ? "Public" : "Privé",
+                  institution.sigle,
+                  INSTITUTION_TYPE_LABEL[institution.type] ?? institution.type,
                   institution.city,
-                  STATUS_LABEL[institution.status] ?? institution.status,
+                  INSTITUTION_STATUS_LABEL[institution.status] ?? institution.status,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
               </p>
 
               <div className="flex flex-wrap gap-2">
+                {institution.sigle && (
+                  <GlassBadge variant="neutral">{institution.sigle}</GlassBadge>
+                )}
                 <GlassBadge variant="neutral">
-                  {institution.type === "public" ? "Public" : "Privé"}
+                  {INSTITUTION_TYPE_LABEL[institution.type] ?? institution.type}
                 </GlassBadge>
                 <GlassBadge variant="neutral">
                   {institution.programCount} formation
@@ -173,24 +163,6 @@ export default async function InstitutionPage({
           </div>
         </GlassPanel>
       </div>
-
-      {noStructure && (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-card border border-warning/30 bg-warning/10 p-4"
-        >
-          <FileQuestion className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-semibold">{INSTITUTION_INCOMPLETE_TITLE}</p>
-            <p className="text-sm leading-relaxed text-muted">
-              {INSTITUTION_INCOMPLETE_MESSAGE} Les informations ci-dessous se
-              limitent à la présentation de l&apos;établissement et à ses
-              sources. Les filières annoncées n&apos;ont pas encore de structure
-              académique documentée.
-            </p>
-          </div>
-        </div>
-      )}
 
       <Section delay={80} className="flex flex-col gap-5">
         <h2 className="text-xl font-bold sm:text-2xl">Présentation</h2>
@@ -256,25 +228,6 @@ export default async function InstitutionPage({
         )}
       </Section>
 
-      <Section delay={160} className="flex flex-col gap-5">
-        <div>
-          <h2 className="text-xl font-bold sm:text-2xl">Unités académiques</h2>
-          <p className="mt-2 text-sm text-muted">
-            {institution.units.length} unité
-            {institution.units.length > 1 ? "s" : ""} — dépliez pour voir les
-            départements et accéder à leurs formations.
-          </p>
-        </div>
-
-        {institution.units.length === 0 ? (
-          <p className="rounded-card border border-glass-border bg-glass-1 p-5 text-sm text-muted">
-            Aucune unité académique renseignée.
-          </p>
-        ) : (
-          <UnitAccordion units={institution.units} />
-        )}
-      </Section>
-
       {institution.photos.length > 0 && (
         <Section delay={200}>
           <PhotoGallery photos={institution.photos} />
@@ -287,7 +240,7 @@ export default async function InstitutionPage({
           <p className="mt-2 text-sm text-muted">
             {institution.programCount} formation
             {institution.programCount > 1 ? "s" : ""} au total, regroupée
-            {institution.programCount > 1 ? "s" : ""} par unité et département.
+            {institution.programCount > 1 ? "s" : ""} par type de diplôme.
           </p>
         </div>
 
@@ -297,38 +250,27 @@ export default async function InstitutionPage({
           </p>
         ) : (
           <div className="flex flex-col gap-10">
-            {institution.units
-              .filter((unit) => unit.programCount > 0)
-              .map((unit) => (
-                <div key={unit.id} className="flex flex-col gap-5">
-                  <h3 className="border-b border-glass-border pb-2 font-semibold">
-                    {unit.name}
-                    <span className="ml-2 text-sm font-normal text-muted">
-                      {unit.programCount}
-                    </span>
-                  </h3>
+            {institution.groups.map((group) => (
+              <div
+                key={group.typeDiplome}
+                // Compense la navbar fixe quand on arrive par une ancre.
+                id={`diplome-${encodeURIComponent(group.typeDiplome)}`}
+                className="scroll-mt-28 flex flex-col gap-4"
+              >
+                <h3 className="border-b border-glass-border pb-2 font-semibold">
+                  {group.typeDiplome}
+                  <span className="ml-2 text-sm font-normal text-muted">
+                    {group.programs.length}
+                  </span>
+                </h3>
 
-                  {unit.departments
-                    .filter((dept) => dept.programs.length > 0)
-                    .map((dept) => (
-                      <div
-                        key={dept.id}
-                        id={`dept-${dept.id}`}
-                        // Compense la navbar fixe quand on arrive par une ancre.
-                        className="scroll-mt-28"
-                      >
-                        <h4 className="text-sm font-medium text-muted">
-                          {dept.name}
-                        </h4>
-                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                          {dept.programs.map((program) => (
-                            <ProgramCard key={program.id} program={program} />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {group.programs.map((program) => (
+                    <ProgramCard key={program.id} program={program} />
+                  ))}
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
         )}
       </Section>

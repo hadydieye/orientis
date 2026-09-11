@@ -3,8 +3,12 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { EntityForm } from "@/components/admin/EntityForm";
 import { ReviewBadge } from "@/components/admin/ReviewBadge";
-import { PROGRAM_NUMERIC, programFields } from "@/components/admin/forms/ProgramFields";
-import { getAdminRow, getDepartmentOptions } from "@/lib/queries/admin-catalog";
+import {
+  PROGRAM_NUMERIC, PROGRAM_RELATION_PATH, PROGRAM_RELATIONS, programFields,
+} from "@/components/admin/forms/ProgramFields";
+import {
+  getAdminRow, getInstitutionOptions, getProgramRelations,
+} from "@/lib/queries/admin-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +20,10 @@ export default async function EditProgramPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [row, departments] = await Promise.all([
+  const [row, institutions, relations] = await Promise.all([
     getAdminRow("programs", id),
-    getDepartmentOptions(),
+    getInstitutionOptions(),
+    getProgramRelations(id),
   ]);
   if (!row) notFound();
 
@@ -39,12 +44,16 @@ export default async function EditProgramPage({
       </div>
 
       <EntityForm
-        fields={programFields(departments)}
+        fields={programFields(institutions)}
         initial={{
-          department_id: str(row.department_id),
           name: str(row.name),
           code: str(row.code),
+          type_diplome_enum: str(row.type_diplome_enum),
+          categorie: str(row.categorie),
+          institutions: relations.institutions,
+          profils: relations.profils,
           level: str(row.level),
+          url_source: str(row.url_source),
           domain: str(row.domain),
           specialty: str(row.specialty),
           duration_years: str(row.duration_years),
@@ -56,6 +65,8 @@ export default async function EditProgramPage({
           further_studies: str(row.further_studies),
         }}
         numericFields={PROGRAM_NUMERIC}
+        relationFields={PROGRAM_RELATIONS}
+        relationPath={PROGRAM_RELATION_PATH}
         table="programs"
         rowId={id}
         backHref="/admin/formations"

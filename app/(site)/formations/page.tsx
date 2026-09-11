@@ -6,13 +6,14 @@ import { getCatalogPrograms } from "@/lib/queries/programs";
 export const metadata: Metadata = {
   title: "Toutes les formations",
   description:
-    "Les formations post-bac référencées en Guinée, filtrables par niveau, établissement et domaine.",
+    "Les formations post-bac référencées en Guinée, filtrables par type de diplôme, catégorie, profil d'entrée et établissement.",
 };
 
 export const revalidate = 3600;
 
 export default async function FormationsPage() {
-  const { programs, domains, levels, institutions } = await getCatalogPrograms();
+  const { programs, typeDiplomes, categories, profils, institutions } =
+    await getCatalogPrograms();
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 px-4 pb-24 sm:px-6">
@@ -21,8 +22,8 @@ export default async function FormationsPage() {
           Toutes les formations
         </h1>
         <p className="max-w-xl text-muted">
-          Les {programs.length} formations actuellement référencées, réparties
-          dans {institutions.length} établissements.
+          Les {programs.length} formations actuellement référencées, proposées
+          par {institutions.length} établissements.
         </p>
       </header>
 
@@ -34,8 +35,9 @@ export default async function FormationsPage() {
       >
         <ProgramsCatalog
           programs={programs}
-          domains={domains}
-          levels={levels}
+          typeDiplomes={typeDiplomes}
+          categories={categories}
+          profils={profils}
           institutions={institutions}
         />
       </Suspense>

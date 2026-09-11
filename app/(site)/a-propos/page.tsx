@@ -63,11 +63,11 @@ export default async function AProposPage() {
               // Ratio et non nombre nu : même traitement que sur l'accueil.
               // Un « 0 » seul se lirait comme une erreur d'affichage, alors
               // qu'il dit quelque chose de précis sur l'état du catalogue.
-              label: "Établissements à seuils vérifiés",
-              value: `${stats.institutionsWithVerifiedRequirements} / ${stats.institutions}`,
+              label: "Formations sourcées officiellement",
+              value: `${stats.programsWithOfficialSource} / ${stats.programs}`,
               hint:
-                stats.institutionsWithVerifiedRequirements === 0
-                  ? "Aucun seuil n'a encore été confirmé auprès d'un établissement."
+                stats.programsWithOfficialSource < stats.programs
+                  ? "Le reste provient d'une compilation non confirmée auprès des établissements."
                   : undefined,
             },
           ].map((stat) => (

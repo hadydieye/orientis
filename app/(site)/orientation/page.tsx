@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { OrientationFlow } from "@/components/orientation/OrientationFlow";
 import { getCatalogInstitutions } from "@/lib/queries/institutions";
+import { CATEGORIE_ORDER } from "@/lib/labels";
 
 export const metadata: Metadata = {
   title: "Trouver ma voie",
   description:
-    "Réponds à deux questions et découvre les formations qui correspondent à ton profil.",
+    "Choisis ta série du baccalauréat et découvre les formations qui te sont ouvertes.",
 };
 
 export const revalidate = 3600;
@@ -21,12 +22,12 @@ export default async function OrientationPage() {
           Trouver ma voie
         </h1>
         <p className="mx-auto max-w-xl text-muted">
-          Deux questions suffisent pour voir les formations compatibles avec ton
-          profil. Aucun compte n&apos;est nécessaire.
+          Une question suffit pour voir les formations ouvertes à ta série du
+          baccalauréat. Aucun compte n&apos;est nécessaire.
         </p>
       </header>
 
-      <OrientationFlow cities={cities} />
+      <OrientationFlow cities={cities} categories={[...CATEGORIE_ORDER]} />
     </main>
   );
 }

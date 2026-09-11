@@ -1,0 +1,271 @@
+﻿code_formation,intitule,type_diplome,categorie,ies_sigle,profils_entree
+LIC-001,Licence professionnelle en Microbiologie et Immunologie,Licence professionnelle,Licence,UGANC,SE + SE-FA
+LIC-001,Licence professionnelle en Microbiologie et Immunologie,Licence professionnelle,Licence,UL,SE + SE-FA
+LIC-002,Licence professionnelle en Biologie Médicale,Licence professionnelle,Licence,UGANC,SE + SE-FA
+LIC-002,Licence professionnelle en Biologie Médicale,Licence professionnelle,Licence,UL,SE + SE-FA
+LIC-002,Licence professionnelle en Biologie Médicale,Licence professionnelle,Licence,UK,SE + SE-FA
+LIC-002,Licence professionnelle en Biologie Médicale,Licence professionnelle,Licence,UZ,SE + SE-FA
+LIC-003,Licence professionnelle en Bioinformatique et Analyse des Données Biologiques,Licence professionnelle,Licence,UGANC,SE + SE-FA
+LIC-004,Licence professionnelle en Biochimie,Licence professionnelle,Licence,UGANC,SE + SE-FA
+LIC-004,Licence professionnelle en Biochimie,Licence professionnelle,Licence,UJNK,SE + SE-FA
+LIC-005,Licence fondamentale en Biologie,Licence fondamentale,Licence,UGANC,SE + SE-FA
+LIC-005,Licence fondamentale en Biologie,Licence fondamentale,Licence,UJNK,SE + SE-FA
+LIC-005,Licence fondamentale en Biologie,Licence fondamentale,Licence,UK,SE + SE-FA
+LIC-006,Licence fondamentale en Chimie,Licence fondamentale,Licence,UGANC,SE + SE-FA + SM
+LIC-006,Licence fondamentale en Chimie,Licence fondamentale,Licence,UJNK,SE + SE-FA + SM
+LIC-006,Licence fondamentale en Chimie,Licence fondamentale,Licence,UK,SE + SE-FA + SM
+LIC-006,Licence fondamentale en Chimie,Licence fondamentale,Licence,UZ,SE + SE-FA + SM
+LIC-007,Licence professionnelle en Chimie Alimentaire et Contrôle Qualité,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-007,Licence professionnelle en Chimie Alimentaire et Contrôle Qualité,Licence professionnelle,Licence,UJNK,SE + SE-FA + SM
+LIC-007,Licence professionnelle en Chimie Alimentaire et Contrôle Qualité,Licence professionnelle,Licence,UZ,SE + SE-FA + SM
+LIC-008,Licence professionnelle en Chimie Environnementale,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-008,Licence professionnelle en Chimie Environnementale,Licence professionnelle,Licence,UZ,SE + SE-FA + SM
+LIC-009,Licence fondamentale en Mathématiques,Licence fondamentale,Licence,UGANC,SE + SE-FA + SM
+LIC-009,Licence fondamentale en Mathématiques,Licence fondamentale,Licence,UJNK,SE + SE-FA + SM
+LIC-009,Licence fondamentale en Mathématiques,Licence fondamentale,Licence,UL,SE + SE-FA + SM
+LIC-009,Licence fondamentale en Mathématiques,Licence fondamentale,Licence,UK,SE + SE-FA + SM
+LIC-009,Licence fondamentale en Mathématiques,Licence fondamentale,Licence,UZ,SE + SE-FA + SM
+LIC-010,"Licence professionnelle en Mathématiques, Intelligence Artificielle et Analyse Prédictive",Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-010,"Licence professionnelle en Mathématiques, Intelligence Artificielle et Analyse Prédictive",Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-011,Licence professionnelle en Modélisation mathématique et Simulation numérique,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-011,Licence professionnelle en Modélisation mathématique et Simulation numérique,Licence professionnelle,Licence,UJNK,SE + SE-FA + SM
+LIC-011,Licence professionnelle en Modélisation mathématique et Simulation numérique,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-011,Licence professionnelle en Modélisation mathématique et Simulation numérique,Licence professionnelle,Licence,UK,SE + SE-FA + SM
+LIC-011,Licence professionnelle en Modélisation mathématique et Simulation numérique,Licence professionnelle,Licence,UZ,SE + SE-FA + SM
+LIC-012,Licence professionnelle en Mathématiques Appliquées,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-013,Licence fondamentale en Physique,Licence fondamentale,Licence,UGANC,SE + SE-FA + SM
+LIC-013,Licence fondamentale en Physique,Licence fondamentale,Licence,UK,SE + SE-FA + SM
+LIC-013,Licence fondamentale en Physique,Licence fondamentale,Licence,UZ,SE + SE-FA + SM
+LIC-014,Licence professionnelle en Électronique et Énergétique,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-014,Licence professionnelle en Électronique et Énergétique,Licence professionnelle,Licence,UJNK,SE + SE-FA + SM
+LIC-014,Licence professionnelle en Électronique et Énergétique,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-014,Licence professionnelle en Électronique et Énergétique,Licence professionnelle,Licence,UZ,SE + SE-FA + SM
+LIC-015,Licence professionnelle en Environnement et Climat,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-015,Licence professionnelle en Environnement et Climat,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-015,Licence professionnelle en Environnement et Climat,Licence professionnelle,Licence,UZ,SE + SE-FA + SM
+LIC-016,Licence professionnelle en Intelligence Artificielle et Systèmes Embarqués,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-016,Licence professionnelle en Intelligence Artificielle et Systèmes Embarqués,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-017,Licence professionnelle en Ingénierie Ferroviaire,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-018,Licence professionnelle en Communication et Signalisation Ferroviaire,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-019,Licence professionnelle en Transport Ferroviaire,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-020,Licence professionnelle en Matériels Roulants Ferroviaires,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-021,Licence professionnelle en Nouvelles Technologies de l’information et de la Communication,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-022,Licence professionnelle en Développement Logiciel et Sécurité Informatique,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-023,Licence professionnelle en Procédés Chimiques et Industriels,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-024,Licence professionnelle en Construction et Infrastructure,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-025,"Licence professionnelle en Automatisme Industriel, Domotique et Systèmes Électroenergétiques",Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-026,Licence professionnelle en Maintenance des Systèmes Industriels,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-027,"Licence professionnelle en Informatique, Systèmes numériques et Intelligence Artificielle",Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-028,"Licence professionnelle en Mécanique des Engins Lourds, Productique et Thermique",Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-029,Licence professionnelle en Systèmes Électroniques et Télécommunications,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-030,Licence professionnelle en Sciences Infirmières,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-031,Licence professionnelle en Préparateur en Pharmacie,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-032,"Licence professionnelle en Biologie Médicale, Analyses biologiques et biotechnologie",Licence professionnelle,Licence,UGANC,SE + SE-FA
+LIC-033,Licence professionnelle en Sciences Obstétricales,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-034,Licence professionnelle en Imagerie Médicale et Radiologie Diagnostique,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-035,Licence professionnelle en Nutrition Clinique et Diététique,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-036,Licence professionnelle en Kinésithérapie,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-037,Licence professionnelle en Finances Publiques et Gouvernance Territoriale,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-038,Licence professionnelle en Statistique appliquée à la Décision Publique,Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-039,"Licence professionnelle en Mathématiques, Physique et Sciences de L’ingénieur (MPSI)",Licence professionnelle,Licence,UGANC,SE + SE-FA + SM
+LIC-040,Licence fondamentale en Droit Privé,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-041,Licence fondamentale en Droit Public,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-042,Licence fondamentale en Sciences Politiques,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-042,Licence fondamentale en Sciences Politiques,Licence fondamentale,Licence,UJNK,SS + SS-FA
+LIC-043,"Licence professionnelle en Banque, Finance et Assurance",Licence professionnelle,Licence,UGLCS,SE + SE-FA + SM
+LIC-043,"Licence professionnelle en Banque, Finance et Assurance",Licence professionnelle,Licence,UJNK,SE + SE-FA + SM
+LIC-043,"Licence professionnelle en Banque, Finance et Assurance",Licence professionnelle,Licence,UK,SE + SE-FA + SM
+LIC-044,Licence fondamentale en Gestion,Licence fondamentale,Licence,UGLCS,SE + SE-FA + SM
+LIC-044,Licence fondamentale en Gestion,Licence fondamentale,Licence,UJNK,SE + SE-FA + SM
+LIC-044,Licence fondamentale en Gestion,Licence fondamentale,Licence,UL,SE + SE-FA + SM
+LIC-044,Licence fondamentale en Gestion,Licence fondamentale,Licence,UK,SE + SE-FA + SM
+LIC-044,Licence fondamentale en Gestion,Licence fondamentale,Licence,UNG,SE + SE-FA + SM
+LIC-045,Licence fondamentale en Économie,Licence fondamentale,Licence,UGLCS,SE + SE-FA + SM
+LIC-045,Licence fondamentale en Économie,Licence fondamentale,Licence,UJNK,SE + SE-FA + SM
+LIC-045,Licence fondamentale en Économie,Licence fondamentale,Licence,UL,SE + SE-FA + SM
+LIC-045,Licence fondamentale en Économie,Licence fondamentale,Licence,UK,SE + SE-FA + SM
+LIC-046,Licence fondamentale en Histoire,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-047,Licence fondamentale en Géographie,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-047,Licence fondamentale en Géographie,Licence fondamentale,Licence,UZ,SS + SS-FA
+LIC-048,Licence fondamentale en Sociologie,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-048,Licence fondamentale en Sociologie,Licence fondamentale,Licence,UJNK,SS + SS-FA
+LIC-048,Licence fondamentale en Sociologie,Licence fondamentale,Licence,UL,SS + SS-FA
+LIC-048,Licence fondamentale en Sociologie,Licence fondamentale,Licence,UK,SS + SS-FA
+LIC-048,Licence fondamentale en Sociologie,Licence fondamentale,Licence,UZ,SS + SS-FA
+LIC-049,Licence fondamentale en Philosophie,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-049,Licence fondamentale en Philosophie,Licence fondamentale,Licence,UJNK,SS + SS-FA
+LIC-049,Licence fondamentale en Philosophie,Licence fondamentale,Licence,UK,SS + SS-FA
+LIC-050,Licence fondamentale en Psychologie,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-050,Licence fondamentale en Psychologie,Licence fondamentale,Licence,UJNK,SS + SS-FA
+LIC-051,Licence fondamentale en Sciences du Langage,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-052,Licence fondamentale en Lettres modernes,Licence fondamentale,Licence,UGLCS,SS + SS-FA
+LIC-053,Licence fondamentale en Langue Arabe,Licence fondamentale,Licence,UGLCS,SS-FA
+LIC-053,Licence fondamentale en Langue Arabe,Licence fondamentale,Licence,UJNK,SS-FA
+LIC-053,Licence fondamentale en Langue Arabe,Licence fondamentale,Licence,UL,SS-FA
+LIC-053,Licence fondamentale en Langue Arabe,Licence fondamentale,Licence,UZ,SS-FA
+LIC-054,"Licence professionnelle en Traduction Arabe, Interprétation et Médiation Interculturelle",Licence professionnelle,Licence,UGLCS,SS-FA
+LIC-054,"Licence professionnelle en Traduction Arabe, Interprétation et Médiation Interculturelle",Licence professionnelle,Licence,UJNK,SS-FA
+LIC-054,"Licence professionnelle en Traduction Arabe, Interprétation et Médiation Interculturelle",Licence professionnelle,Licence,UL,SS-FA
+LIC-054,"Licence professionnelle en Traduction Arabe, Interprétation et Médiation Interculturelle",Licence professionnelle,Licence,UZ,SS-FA
+LIC-055,Licence fondamentale en Langue Anglaise,Licence fondamentale,Licence,UGLCS,SS
+LIC-055,Licence fondamentale en Langue Anglaise,Licence fondamentale,Licence,UJNK,SS
+LIC-055,Licence fondamentale en Langue Anglaise,Licence fondamentale,Licence,UL,SS
+LIC-055,Licence fondamentale en Langue Anglaise,Licence fondamentale,Licence,UK,SS
+LIC-055,Licence fondamentale en Langue Anglaise,Licence fondamentale,Licence,UZ,SS
+LIC-056,Licence professionnelle en Bibliothéconomie et Information Numérique,Licence professionnelle,Licence,UJNK,SS + SS-FA
+LIC-057,Licence professionnelle en Archivistique et Gestion Documentaire,Licence professionnelle,Licence,UJNK,SS + SS-FA
+LIC-058,"Licence professionnelle en Documentation, Veille et Gestion de l’Information Numérique",Licence professionnelle,Licence,UJNK,SS + SS-FA
+LIC-059,Licence professionnelle en Patrimoine Historique et Culturel,Licence professionnelle,Licence,UJNK,SS + SS-FA
+LIC-060,"Licence professionnelle en Littérature, Société et Communication",Licence professionnelle,Licence,UJNK,SS + SS-FA
+LIC-060,"Licence professionnelle en Littérature, Société et Communication",Licence professionnelle,Licence,UL,SS + SS-FA
+LIC-060,"Licence professionnelle en Littérature, Société et Communication",Licence professionnelle,Licence,UK,SS + SS-FA
+LIC-061,Licence fondamentale en Littérature,Licence fondamentale,Licence,UJNK,SS + SS-FA
+LIC-061,Licence fondamentale en Littérature,Licence fondamentale,Licence,UL,SS + SS-FA
+LIC-062,Licence professionnelle en Géomatique,Licence professionnelle,Licence,UJNK,SS + SS-FA
+LIC-063,Licence fondamentale en Linguistique,Licence fondamentale,Licence,UJNK,SS + SS-FA
+LIC-064,Licence professionnelle en Langue et Communication,Licence professionnelle,Licence,UJNK,SS + SS-FA
+LIC-065,Licence professionnelle en Développement Local et Gestion de Projets,Licence professionnelle,Licence,UJNK,SS + SS-FA
+LIC-065,Licence professionnelle en Développement Local et Gestion de Projets,Licence professionnelle,Licence,UL,SS + SS-FA
+LIC-065,Licence professionnelle en Développement Local et Gestion de Projets,Licence professionnelle,Licence,UK,SS + SS-FA
+LIC-065,Licence professionnelle en Développement Local et Gestion de Projets,Licence professionnelle,Licence,UZ,SS + SS-FA
+LIC-066,Licence professionnelle en Business Administration,Licence professionnelle,Licence,UJNK,SS + SS-FA
+LIC-066,Licence professionnelle en Business Administration,Licence professionnelle,Licence,UL,SS + SS-FA
+LIC-067,Licence professionnelle en Commerce International et Logistique,Licence professionnelle,Licence,UJNK,SE + SE-FA + SM
+LIC-067,Licence professionnelle en Commerce International et Logistique,Licence professionnelle,Licence,UK,SE + SE-FA + SM
+LIC-067,Licence professionnelle en Commerce International et Logistique,Licence professionnelle,Licence,ISCAEG,SE + SE-FA + SM
+LIC-068,Licence fondamentale en Géologie,Licence fondamentale,Licence,UJNK,SE + SE-FA
+LIC-069,Licence fondamentale en Physique,Licence fondamentale,Licence,UJNK,SE + SE-FA + SM
+LIC-070,Licence professionnelle en Management de la Qualité et Normalisation,Licence professionnelle,Licence,ISSMV,SE + SE-FA + SM
+LIC-071,Licence professionnelle en Santé et Production Animale,Licence professionnelle,Licence,ISSMV,SE + SE-FA
+LIC-072,Licence professionnelle en Transformation et Valorisation des Produits Halieutiques,Licence professionnelle,Licence,ISSMV,SE + SE-FA + SM
+LIC-073,Licence professionnelle en Architecture Intérieure et Design d’Espace,Licence professionnelle,Licence,ISAU,SE + SE-FA + SM
+LIC-074,Licence professionnelle en Patrimoine Architectural et Restauration,Licence professionnelle,Licence,ISAU,SE + SE-FA + SM
+LIC-075,"Licence professionnelle en Habitat, Logement et Développement Urbain",Licence professionnelle,Licence,ISAU,SE + SE-FA + SM
+LIC-076,Licence professionnelle en Langue Anglaise,Licence professionnelle,Licence,ISSEG,SS
+LIC-077,Licence professionnelle en Langue Française,Licence professionnelle,Licence,ISSEG,SS
+LIC-078,Licence professionnelle en Géographie-Économie,Licence professionnelle,Licence,ISSEG,SS + SS-FA
+LIC-079,Licence professionnelle en Philosophie-Histoire-ECM,Licence professionnelle,Licence,ISSEG,SS + SS-FA
+LIC-080,Licence professionnelle en Mathématiques-Physique,Licence professionnelle,Licence,ISSEG,SE + SE-FA + SM
+LIC-081,Licence professionnelle en Biologie-Géologie,Licence professionnelle,Licence,ISSEG,SE + SE-FA
+LIC-082,Licence professionnelle en Physique-Chimie-Technologie,Licence professionnelle,Licence,ISSEG,SE + SE-FA + SM
+LIC-083,Licence professionnelle en Transformation Numérique des Organisations,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-084,"Licence professionnelle en Traduction, Interprétation et Localisation",Licence professionnelle,Licence,UL,SS + SS-FA
+LIC-084,"Licence professionnelle en Traduction, Interprétation et Localisation",Licence professionnelle,Licence,UK,SS + SS-FA
+LIC-084,"Licence professionnelle en Traduction, Interprétation et Localisation",Licence professionnelle,Licence,UZ,SS + SS-FA
+LIC-085,Licence professionnelle en Langue Arabe Appliquée aux Affaires et au Commerce International,Licence professionnelle,Licence,UL,SS-FA
+LIC-086,Licence professionnelle en Anthropologie,Licence professionnelle,Licence,UL,SS + SS-FA
+LIC-087,Licence professionnelle en Biologie moléculaire et Biotechnologies,Licence professionnelle,Licence,UL,SE + SE-FA
+LIC-088,Licence professionnelle en Chimie-Environnement,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-089,Licence professionnelle en Énergies Renouvelables,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-090,Licence professionnelle en Économie Sociale et Solidaire,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-091,Licence professionnelle en Management de Projets et Innovation,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-092,Licence professionnelle en Développement d’Application,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-093,Licence professionnelle en Réseaux et Cybersécurité,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-094,Licence professionnelle en Administration Publique,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-095,Licence professionnelle en Économie Statistique,Licence professionnelle,Licence,UL,SE + SE-FA + SM
+LIC-096,"Licence professionnelle en Droit Minier, Énergie et Environnement",Licence professionnelle,Licence,UL,SS + SS-FA
+LIC-097,Licence professionnelle en Communication et Relations Publiques,Licence professionnelle,Licence,ISIC,SS + SS-FA
+LIC-098,Licence professionnelle en Production de Contenus Numériques,Licence professionnelle,Licence,ISIC,SS + SS-FA
+LIC-099,Licence professionnelle en Marketing et Communication Digitale,Licence professionnelle,Licence,ISIC,SS + SS-FA
+LIC-100,Licence professionnelle en Journalisme,Licence professionnelle,Licence,ISIC,SS + SS-FA
+LIC-101,Licence professionnelle en Planification Territoriale et Villes Durables,Licence professionnelle,Licence,UK,SS + SS-FA
+LIC-102,Licence professionnelle en Diplomatie et Coopération Internationale,Licence professionnelle,Licence,UK,SS + SS-FA
+LIC-103,Licence professionnelle en Statistiques du Développement,Licence professionnelle,Licence,UK,SE + SE-FA + SM
+LIC-104,Licence professionnelle en Musique,Licence professionnelle,Licence,ISAMK Dubr.,SE + SE-FA + SM + SS + SS-FA
+LIC-105,Licence professionnelle en Musicologie,Licence professionnelle,Licence,ISAMK Dubr.,SE + SE-FA + SM + SS + SS-FA
+LIC-106,Licence professionnelle en Arts Plastiques,Licence professionnelle,Licence,ISAMK Dubr.,SE + SE-FA + SM
+LIC-107,Licence professionnelle en Arts Appliqués,Licence professionnelle,Licence,ISAMK Dubr.,SE + SE-FA + SM
+LIC-108,Licence professionnelle en Cinéma,Licence professionnelle,Licence,ISAMK Dubr.,SE + SE-FA + SM
+LIC-109,Licence professionnelle en Audiovisuel,Licence professionnelle,Licence,ISAMK Dubr.,SE + SE-FA + SM
+LIC-110,Licence professionnelle en Arts Dramatiques,Licence professionnelle,Licence,ISAMK Dubr.,SS + SS-FA
+LIC-111,Licence professionnelle en Culture,Licence professionnelle,Licence,ISAMK Dubr.,SS + SS-FA
+LIC-112,Licence professionnelle en Gestion de l’Eau et de l’Environnement,Licence professionnelle,Licence,UZ,SE + SE-FA + SM
+LIC-113,Licence professionnelle en Gestion Durable des écosystèmes et de la Biodiversité,Licence professionnelle,Licence,UZ,SE + SE-FA + SM
+LIC-114,Licence professionnelle en Sciences de l’Atmosphère,Licence professionnelle,Licence,UZ,SE + SE-FA + SM
+LIC-115,Licence professionnelle en Sciences Hydrologiques,Licence professionnelle,Licence,UZ,SE + SE-FA + SM
+LIC-116,Licence professionnelle en Système d’Information Géographique et Télédétection,Licence professionnelle,Licence,UZ,SS + SS-FA
+LIC-117,Licence fondamentale en Anthropologie,Licence fondamentale,Licence,UZ,SS + SS-FA
+LIC-118,Licence professionnelle en Sciences de la Terre,Licence professionnelle,Licence,ISMG Boké,SE + SE-FA + SM
+LIC-119,"Licence professionnelle en Santé, Sécurité et Hygiène Minières",Licence professionnelle,Licence,ISMG Boké,SE + SE-FA + SM
+LIC-120,Licence professionnelle en Économie et Gestion des Entreprises Minières,Licence professionnelle,Licence,ISMG Boké,SE + SE-FA + SM
+LIC-121,Licence professionnelle en Logistique et Transport Miniers,Licence professionnelle,Licence,ISMG Boké,SE + SE-FA + SM
+LIC-122,Licence professionnelle en Environnement Minier et Développement Durable,Licence professionnelle,Licence,ISMG Boké,SE + SE-FA + SM
+LIC-123,Licence professionnelle en Électricité et Automatisation des Installations Minières,Licence professionnelle,Licence,ISMG Boké,SE + SE-FA + SM
+LIC-124,Licence professionnelle en Exploitation Minière,Licence professionnelle,Licence,ISMG Boké,SE + SE-FA + SM
+LIC-125,Licence professionnelle en Géomatique et Topographie Minière,Licence professionnelle,Licence,ISMG Boké,SE + SE-FA + SM
+LIC-126,Licence professionnelle en Valorisation des Ressources Minérales,Licence professionnelle,Licence,ISMG Boké,SE + SE-FA + SM
+LIC-127,Licence professionnelle en Mécatronique,Licence professionnelle,Licence,IST Mamou,SE + SE-FA + SM
+LIC-128,Licence professionnelle en Systèmes Embarqués et Objets Connectés,Licence professionnelle,Licence,IST Mamou,SE + SE-FA + SM
+LIC-129,Licence professionnelle en Informatique Industrielle,Licence professionnelle,Licence,IST Mamou,SE + SE-FA + SM
+LIC-130,Licence professionnelle en Droit Privé,Licence professionnelle,Licence,UNG,SS + SS-FA
+LIC-131,Licence professionnelle en Droit Public,Licence professionnelle,Licence,UNG,SS + SS-FA
+LIC-132,Licence fondamentale en Économie,Licence fondamentale,Licence,UNG,SE + SE-FA + SM
+LIC-133,Licence professionnelle en Développement Communautaire,Licence professionnelle,Licence,UNG,SE + SE-FA + SM
+LIC-134,Licence professionnelle en Finance et Comptabilité,Licence professionnelle,Licence,ISCAEG,SE + SE-FA + SM
+LIC-135,Licence professionnelle en Gestion des Ressources Humaines,Licence professionnelle,Licence,ISCAEG,SE + SE-FA + SM
+LIC-136,Licence professionnelle en Marketing et Communication,Licence professionnelle,Licence,ISCAEG,SE + SE-FA + SM
+LIC-137,Licence professionnelle en Microfinance,Licence professionnelle,Licence,ISCAEG,SE + SE-FA + SM
+LIC-138,Licence professionnelle en Entrepreneuriat et Gestion des PME et PMI,Licence professionnelle,Licence,ISCAEG,SE + SE-FA + SM
+LIC-139,Licence professionnelle en Logistique et Supply Chain,Licence professionnelle,Licence,ISCAEG,SE + SE-FA + SM
+LIC-140,Licence professionnelle en Sciences Alimentaires et Nutrition,Licence professionnelle,Licence,ESTH,SE + SE-FA
+LIC-141,Licence professionnelle en Management Touristique,Licence professionnelle,Licence,ESTH,SE + SE-FA + SM + SS + SS-FA
+LIC-142,Licence Professionnelle en Management de l’Hôtellerie et de la Restauration,Licence professionnelle,Licence,ESTH,SE + SE-FA + SM + SS + SS-FA
+LIC-143,Licence fondamentale en Management des Entreprises Agricoles,Licence fondamentale,Licence,ISAV Faranah,SE + SE-FA + SM
+LIC-144,Licence fondamentale en Économie Agricole,Licence fondamentale,Licence,ISAV Faranah,SE + SE-FA + SM
+LIC-145,Licence professionnelle en Vulgarisation Agricole,Licence professionnelle,Licence,ISAV Faranah,SE + SE-FA + SM
+LIC-146,Licence professionnelle en Aménagement et Environnement Forestiers,Licence professionnelle,Licence,ISAV Faranah,SE + SE-FA + SM
+LIC-147,Licence professionnelle en Sciences Alimentaires et Nutritionnelles,Licence professionnelle,Licence,ISAV Faranah,SE + SE-FA + SM
+LIC-148,Licence professionnelle en Génie Rural,Licence professionnelle,Licence,ISAV Faranah,SE + SE-FA + SM
+LIC-149,Licence professionnelle en Agroforesterie,Licence professionnelle,Licence,ISAV Faranah,SE + SE-FA + SM
+LIC-150,Licence professionnelle en Agriculture,Licence professionnelle,Licence,ISAV Faranah,SE + SE-FA + SM
+DUT-001,DUT en Assistant Vétérinaire,DUT,DUT & Cycle préparatoire,ISSMV,SE + SE-FA
+DUT-002,DUT en Contrôle de Qualité des Aliments,DUT,DUT & Cycle préparatoire,ISSMV,SE + SE-FA + SM
+DUT-003,DUT en Aquaculture,DUT,DUT & Cycle préparatoire,ISSMV,SE + SE-FA + SM
+DUT-004,DUT en Énergies Renouvelables et Efficacité Énergétique,DUT,DUT & Cycle préparatoire,UK,SE + SE-FA + SM
+DUT-005,DUT en Réalisation et Production Cinématographiques,DUT,DUT & Cycle préparatoire,ISAMK Dubr.,SS + SS-FA
+DUT-006,DUT en Production Audiovisuelle et Médias Numériques,DUT,DUT & Cycle préparatoire,ISAMK Dubr.,SS + SS-FA
+DUT-007,DUT en Hydraulique et Gestion des Ressources en Eau,DUT,DUT & Cycle préparatoire,UZ,SE + SE-FA + SM
+DUT-008,DUT en Géomatique,DUT,DUT & Cycle préparatoire,UZ,SS + SS-FA
+DUT-009,DUT en Échantillonnage et Contrôle Qualité des Minerais,DUT,DUT & Cycle préparatoire,ISMG Boké,SE + SE-FA + SM
+DUT-010,DUT en Simulation et Optimisation des Procédés Métallurgiques,DUT,DUT & Cycle préparatoire,ISMG Boké,SE + SE-FA + SM
+DUT-011,"DUT en Dimensionnement, Installation et Maintenance de Système Photovoltaïque",DUT,DUT & Cycle préparatoire,IST Mamou,SE + SE-FA + SM
+DUT-012,DUT en Technologie Alimentaire,DUT,DUT & Cycle préparatoire,ESTH,SE + SE-FA
+DUT-013,DUT en Aménagement Paysager,DUT,DUT & Cycle préparatoire,ISAV Faranah,SE + SE-FA + SM
+DUT-014,DUT en Technologies Agro-industrielles,DUT,DUT & Cycle préparatoire,ISAV Faranah,SE + SE-FA + SM
+DUT-015,"Cycle préparatoire Mathématiques, Physique et Sciences de l’Ingénieur",Cycle préparatoire,DUT & Cycle préparatoire,CPGE,SE + SE-FA + SM
+DUT-016,"Cycle préparatoire Économie, Gestion et Statistiques",Cycle préparatoire,DUT & Cycle préparatoire,CPGE,SE + SM
+ING-001,Génie Chimique,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-002,Génie Civil,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-003,Génie Électrique,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-004,Génie Industriel et Maintenance,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-005,Génie Informatique,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-005,Génie Informatique,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,IST Mamou,SE + SE-FA + SM
+ING-006,Génie Mécanique,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-007,Génie des Télécommunications,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-008,Diplôme d’État de Docteur en Médecine,Diplôme d’État,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-009,Diplôme d’État de Docteur en Pharmacie,Diplôme d’État,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-010,Diplôme d’État de Docteur en Odontologie,Diplôme d’État,Diplôme d'État & Ingénierie,UGANC,SE + SE-FA + SM
+ING-011,Diplôme d’État de Docteur en Médecine Vétérinaire,Diplôme d’État,Diplôme d'État & Ingénierie,ISSMV,SE + SE-FA
+ING-012,Génie en Technologie et Contrôle des Produits Alimentaires,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISSMV,SE + SE-FA + SM
+ING-013,Génie en Pêche et Aquaculture,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISSMV,SE + SE-FA + SM
+ING-014,Diplôme d’État en Architecture,Diplôme d’État,Diplôme d'État & Ingénierie,ISAU,SE + SE-FA + SM
+ING-015,Diplôme d’État en Urbanisme,Diplôme d’État,Diplôme d'État & Ingénierie,ISAU,SE + SE-FA + SM
+ING-016,Génie des Ressources Naturelles,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UZ,SE + SE-FA + SM
+ING-017,Génie en Sciences de l’Environnement,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UZ,SE + SE-FA + SM
+ING-018,Génie Hydrologique,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UZ,SE + SE-FA + SM
+ING-019,Génie en Sciences de l’Atmosphère,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,UZ,SE + SE-FA + SM
+ING-020,Génie Géologique,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISMG Boké,SE + SE-FA
+ING-021,Génie Minier,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISMG Boké,SE + SE-FA + SM
+ING-022,Génie Traitement des Minerais et Métallurgie,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISMG Boké,SE + SE-FA + SM
+ING-023,Génie de l’Environnement et Sécurité Industriels,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISMG Boké,SE + SE-FA + SM
+ING-024,Génie Énergétique,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,IST Mamou,SE + SE-FA + SM
+ING-025,Génie en Instrumentation et Maintenance,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,IST Mamou,SE + SE-FA + SM
+ING-026,Génie en Technologies des Équipements Biomédicaux,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,IST Mamou,SE + SE-FA + SM
+ING-027,Génie en Conception et Fabrication Mécanique,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,IST Mamou,SE + SE-FA + SM
+ING-028,Génie en Analyses Chimiques et Contrôle Qualité,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,IST Mamou,SE + SE-FA + SM
+ING-029,Génie en Bioingénierie,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,IST Mamou,SE + SE-FA + SM
+ING-030,Ingénierie en Sciences Agricoles,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISAV Faranah,SE + SE-FA + SM
+ING-031,Ingénierie en Agroforesterie,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISAV Faranah,SE + SE-FA + SM
+ING-032,Ingénierie en Aménagement et Environnement Forestiers,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISAV Faranah,SE + SE-FA + SM
+ING-033,Ingénierie en Sciences Animales,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISAV Faranah,SE + SE-FA + SM
+ING-034,Ingénierie en Génie Rural,Diplôme d’ingénieur,Diplôme d'État & Ingénierie,ISAV Faranah,SE + SE-FA + SM

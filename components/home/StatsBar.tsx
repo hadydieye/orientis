@@ -26,12 +26,12 @@ export function StatsBar({ stats }: { stats: HomeStats }) {
       icon: ShieldCheck,
       // Ratio plutôt que nombre nu : le lecteur voit le numérateur ET
       // l'ensemble, donc la valeur reste honnête même quand elle est basse.
-      value: `${stats.institutionsWithVerifiedRequirements} / ${stats.institutions}`,
-      label: "Établissements à seuils vérifiés",
+      value: `${stats.programsWithOfficialSource} / ${stats.programs}`,
+      label: "Formations sourcées officiellement",
       hint:
-        stats.institutionsWithVerifiedRequirements === 0
-          ? "Seuils issus d'une compilation communautaire, pas encore confirmés auprès des établissements."
-          : undefined,
+        stats.programsWithOfficialSource < stats.programs
+          ? "Le reste provient d'une compilation non confirmée auprès des établissements."
+          : "Chaque fiche renvoie à sa page officielle sur ParcourSup Guinée.",
     },
     {
       icon: MapPin,
