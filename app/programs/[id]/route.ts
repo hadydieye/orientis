@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { makeUpdateHandler, makeDeleteHandler } from "@/lib/api/crud";
 
-// GET /programs/:id — admission_requirements, fees, program_documents, sources joints
+// GET /programs/:id — établissements, profils, compétences, métiers, secteurs
+// et employeurs joints, plus les conditions d'admission et frais s'ils ont été
+// saisis en back-office.
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,6 +16,11 @@ export async function GET(
     .from("programs")
     .select(
       `*,
+      program_institutions(institutions(id, name, sigle, city)),
+      program_profils(profil),
+      competences(ordre, libelle),
+      metiers(ordre, libelle),
+      secteurs(id, ordre, nom, employeurs(ordre, libelle)),
       admission_requirements(*, academic_year:academic_years(*), source:sources(*)),
       fees(*, academic_year:academic_years(*), source:sources(*)),
       program_documents(*, document:documents(*))`

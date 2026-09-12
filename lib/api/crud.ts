@@ -14,7 +14,6 @@ import { createClient } from "@/lib/supabase/server";
 export type CatalogTable =
   | "institutions"
   | "academic_units"
-  | "departments"
   | "programs"
   | "admission_requirements"
   | "fees"

@@ -16,7 +16,6 @@ import { createServiceClient } from "@/lib/supabase/service";
 export type AdminCounts = {
   institutions: number;
   academicUnits: number;
-  departments: number;
   programs: number;
   admissionRequirements: number;
   fees: number;
@@ -34,7 +33,6 @@ async function countOf(
   supabase: CatalogClient,
   table:
     | "academic_units"
-    | "departments"
     | "programs"
     | "admission_requirements"
     | "fees"
@@ -50,7 +48,6 @@ export async function getAdminCounts(): Promise<AdminCounts> {
   const PENDING_SECTIONS = [
     { key: "institutions", label: "Établissements", href: "/admin/institutions" },
     { key: "academic_units", label: "Unités académiques", href: "/admin/unites" },
-    { key: "departments", label: "Départements", href: "/admin/departements" },
     { key: "programs", label: "Formations", href: "/admin/formations" },
     { key: "admission_requirements", label: "Conditions d'admission", href: "/admin/admissions" },
     { key: "fees", label: "Frais", href: "/admin/frais" },
@@ -59,7 +56,6 @@ export async function getAdminCounts(): Promise<AdminCounts> {
   const [
     institutions,
     academicUnits,
-    departments,
     programs,
     admissionRequirements,
     fees,
@@ -71,7 +67,6 @@ export async function getAdminCounts(): Promise<AdminCounts> {
     // Depuis staff_read_all, ces comptes sont exacts sous la session de
     // l'utilisateur : plus besoin d'élever les privilèges pour les obtenir.
     countOf(supabase, "academic_units"),
-    countOf(supabase, "departments"),
     countOf(supabase, "programs"),
     countOf(supabase, "admission_requirements"),
     countOf(supabase, "fees"),
@@ -95,7 +90,6 @@ export async function getAdminCounts(): Promise<AdminCounts> {
   return {
     institutions: institutions.count ?? 0,
     academicUnits,
-    departments,
     programs,
     admissionRequirements,
     fees,
@@ -133,19 +127,17 @@ export async function getAdminInstitutions(
 
   const { data: rows } = await query;
 
-  // Le comptage des formations passe par programs/departments/academic_units.
-  // Depuis staff_read_all, un membre du staff voit aussi les lignes non
-  // validées : le compte reflète donc l'arborescence réelle, pending compris,
-  // et non le seul contenu publié.
-  const { data: programRows } = await supabase
-    .from("programs")
-    .select("id, departments!inner(academic_units!inner(institution_id))");
+  // Le comptage des formations passe par la table de liaison N-N. Depuis
+  // staff_read_all, un membre du staff voit aussi les lignes non validées : le
+  // compte reflète donc le catalogue réel, pending compris, et non le seul
+  // contenu publié.
+  const { data: linkRows } = await supabase
+    .from("program_institutions")
+    .select("institution_id");
 
-  type ProgramRow = { departments: { academic_units: { institution_id: string } } };
   const counts = new Map<string, number>();
-  for (const p of (programRows ?? []) as unknown as ProgramRow[]) {
-    const id = p.departments.academic_units.institution_id;
-    counts.set(id, (counts.get(id) ?? 0) + 1);
+  for (const link of linkRows ?? []) {
+    counts.set(link.institution_id, (counts.get(link.institution_id) ?? 0) + 1);
   }
 
   return (rows ?? []).map((i) => ({

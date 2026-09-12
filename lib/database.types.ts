@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.17"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -238,6 +238,35 @@ export type Database = {
           },
         ]
       }
+      competences: {
+        Row: {
+          id: string
+          libelle: string
+          ordre: number
+          program_id: string
+        }
+        Insert: {
+          id?: string
+          libelle: string
+          ordre: number
+          program_id: string
+        }
+        Update: {
+          id?: string
+          libelle?: string
+          ordre?: number
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competences_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           academic_unit_id: string
@@ -299,6 +328,35 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      employeurs: {
+        Row: {
+          id: string
+          libelle: string
+          ordre: number
+          secteur_id: string
+        }
+        Insert: {
+          id?: string
+          libelle: string
+          ordre: number
+          secteur_id: string
+        }
+        Update: {
+          id?: string
+          libelle?: string
+          ordre?: number
+          secteur_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employeurs_secteur_id_fkey"
+            columns: ["secteur_id"]
+            isOneToOne: false
+            referencedRelation: "secteurs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fees: {
         Row: {
@@ -367,9 +425,6 @@ export type Database = {
           },
         ]
       }
-      // Ajoutée à la main : la migration 20260830000000_institution_photos.sql
-      // est appliquée, mais la régénération des types passe par le projet
-      // Supabase relié au MCP, qui n'est pas celui-ci.
       institution_photos: {
         Row: {
           caption: string | null
@@ -414,8 +469,6 @@ export type Database = {
           },
         ]
       }
-      // Ajoutée à la main : la régénération des types passe par le projet
-      // Supabase relié au MCP, qui n'est pas celui-ci.
       institution_sources: {
         Row: {
           created_at: string
@@ -480,6 +533,7 @@ export type Database = {
           phone: string | null
           recognition_status: string | null
           review_status: string
+          sigle: string | null
           status: string
           type: string
           updated_at: string
@@ -503,6 +557,7 @@ export type Database = {
           phone?: string | null
           recognition_status?: string | null
           review_status?: string
+          sigle?: string | null
           status: string
           type: string
           updated_at?: string
@@ -526,12 +581,42 @@ export type Database = {
           phone?: string | null
           recognition_status?: string | null
           review_status?: string
+          sigle?: string | null
           status?: string
           type?: string
           updated_at?: string
           website?: string | null
         }
         Relationships: []
+      }
+      metiers: {
+        Row: {
+          id: string
+          libelle: string
+          ordre: number
+          program_id: string
+        }
+        Insert: {
+          id?: string
+          libelle: string
+          ordre: number
+          program_id: string
+        }
+        Update: {
+          id?: string
+          libelle?: string
+          ordre?: number
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metiers_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       program_documents: {
         Row: {
@@ -572,15 +657,71 @@ export type Database = {
           },
         ]
       }
+      program_institutions: {
+        Row: {
+          institution_id: string
+          program_id: string
+        }
+        Insert: {
+          institution_id: string
+          program_id: string
+        }
+        Update: {
+          institution_id?: string
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_institutions_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_institutions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_profils: {
+        Row: {
+          profil: Database["public"]["Enums"]["profil_entree"]
+          program_id: string
+        }
+        Insert: {
+          profil: Database["public"]["Enums"]["profil_entree"]
+          program_id: string
+        }
+        Update: {
+          profil?: Database["public"]["Enums"]["profil_entree"]
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_profils_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programs: {
         Row: {
+          academic_unit_id: string | null
+          annee_source: number | null
           career_prospects: string | null
-          code: string | null
+          categorie: Database["public"]["Enums"]["categorie_formation"] | null
+          code: string
           created_at: string
           created_by: string | null
           curriculum: string | null
           degree_awarded: string | null
-          department_id: string
+          department_id: string | null
           description: string | null
           domain: string | null
           duration_years: number | null
@@ -589,18 +730,24 @@ export type Database = {
           language: string
           level: string
           name: string
+          numero_source: number | null
           review_status: string
           specialty: string | null
+          type_diplome_enum: Database["public"]["Enums"]["type_diplome"] | null
           updated_at: string
+          url_source: string | null
         }
         Insert: {
+          academic_unit_id?: string | null
+          annee_source?: number | null
           career_prospects?: string | null
-          code?: string | null
+          categorie?: Database["public"]["Enums"]["categorie_formation"] | null
+          code: string
           created_at?: string
           created_by?: string | null
           curriculum?: string | null
           degree_awarded?: string | null
-          department_id: string
+          department_id?: string | null
           description?: string | null
           domain?: string | null
           duration_years?: number | null
@@ -609,18 +756,24 @@ export type Database = {
           language?: string
           level: string
           name: string
+          numero_source?: number | null
           review_status?: string
           specialty?: string | null
+          type_diplome_enum?: Database["public"]["Enums"]["type_diplome"] | null
           updated_at?: string
+          url_source?: string | null
         }
         Update: {
+          academic_unit_id?: string | null
+          annee_source?: number | null
           career_prospects?: string | null
-          code?: string | null
+          categorie?: Database["public"]["Enums"]["categorie_formation"] | null
+          code?: string
           created_at?: string
           created_by?: string | null
           curriculum?: string | null
           degree_awarded?: string | null
-          department_id?: string
+          department_id?: string | null
           description?: string | null
           domain?: string | null
           duration_years?: number | null
@@ -629,16 +782,55 @@ export type Database = {
           language?: string
           level?: string
           name?: string
+          numero_source?: number | null
           review_status?: string
           specialty?: string | null
+          type_diplome_enum?: Database["public"]["Enums"]["type_diplome"] | null
           updated_at?: string
+          url_source?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "programs_academic_unit_id_fkey"
+            columns: ["academic_unit_id"]
+            isOneToOne: false
+            referencedRelation: "academic_units"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "programs_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      secteurs: {
+        Row: {
+          id: string
+          nom: string | null
+          ordre: number
+          program_id: string
+        }
+        Insert: {
+          id?: string
+          nom?: string | null
+          ordre: number
+          program_id: string
+        }
+        Update: {
+          id?: string
+          nom?: string | null
+          ordre?: number
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "secteurs_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
             referencedColumns: ["id"]
           },
         ]
@@ -737,15 +929,18 @@ export type Database = {
     Functions: {
       has_role: { Args: { _role: string }; Returns: boolean }
       recommend_programs: {
-        Args: { p_average: number; p_series: string }
+        Args: { p_profil: Database["public"]["Enums"]["profil_entree"] }
         Returns: {
+          academic_unit_id: string | null
+          annee_source: number | null
           career_prospects: string | null
-          code: string | null
+          categorie: Database["public"]["Enums"]["categorie_formation"] | null
+          code: string
           created_at: string
           created_by: string | null
           curriculum: string | null
           degree_awarded: string | null
-          department_id: string
+          department_id: string | null
           description: string | null
           domain: string | null
           duration_years: number | null
@@ -754,9 +949,12 @@ export type Database = {
           language: string
           level: string
           name: string
+          numero_source: number | null
           review_status: string
           specialty: string | null
+          type_diplome_enum: Database["public"]["Enums"]["type_diplome"] | null
           updated_at: string
+          url_source: string | null
         }[]
         SetofOptions: {
           from: "*"
@@ -767,7 +965,18 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      categorie_formation:
+        | "Licence"
+        | "Diplôme d'État & Ingénierie"
+        | "DUT & Cycle préparatoire"
+      profil_entree: "SE" | "SE-FA" | "SM" | "SS" | "SS-FA"
+      type_diplome:
+        | "Licence professionnelle"
+        | "Diplôme d’ingénieur"
+        | "Licence fondamentale"
+        | "DUT"
+        | "Diplôme d’État"
+        | "Cycle préparatoire"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -783,12 +992,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -812,11 +1021,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -837,11 +1046,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -862,11 +1071,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -879,11 +1088,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -894,7 +1103,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      categorie_formation: [
+        "Licence",
+        "Diplôme d'État & Ingénierie",
+        "DUT & Cycle préparatoire",
+      ],
+      profil_entree: ["SE", "SE-FA", "SM", "SS", "SS-FA"],
+      type_diplome: [
+        "Licence professionnelle",
+        "Diplôme d’ingénieur",
+        "Licence fondamentale",
+        "DUT",
+        "Diplôme d’État",
+        "Cycle préparatoire",
+      ],
+    },
   },
 } as const
-

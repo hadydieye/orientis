@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { GlassBadge } from "@/components/ui/GlassBadge";
-import { LEVEL_LABEL } from "@/lib/labels";
-import { hasLimitedInfo } from "@/lib/programs/completeness";
-import { LimitedInfoBadge } from "@/components/program/LimitedInfoBadge";
+import { PROFIL_LABEL } from "@/lib/labels";
 import type { DetailProgram } from "@/lib/queries/institution-detail";
 
 export function ProgramCard({ program }: { program: DetailProgram }) {
@@ -14,17 +12,14 @@ export function ProgramCard({ program }: { program: DetailProgram }) {
     >
       <span className="font-medium leading-snug">{program.name}</span>
       <span className="flex flex-wrap items-center gap-2">
-        <GlassBadge variant="neutral">
-          {LEVEL_LABEL[program.level] ?? program.level}
-        </GlassBadge>
-        {/* Durée absente pour certaines formations : on n'affiche rien
-            plutôt qu'un "?" trompeur. */}
-        {program.durationYears !== null && (
-          <span className="text-xs text-muted">
-            {program.durationYears} an{program.durationYears > 1 ? "s" : ""}
-          </span>
-        )}
-        {hasLimitedInfo(program) && <LimitedInfoBadge />}
+        {program.profils.map((profil) => (
+          <GlassBadge key={profil} variant="neutral">
+            {/* Le sigle brut suffit sur une carte de liste ; le libellé
+                complet est donné en title pour lever l'ambiguïté FA. */}
+            <span title={PROFIL_LABEL[profil] ?? profil}>{profil}</span>
+          </GlassBadge>
+        ))}
+        <span className="text-xs text-muted-dark">{program.code}</span>
       </span>
     </Link>
   );

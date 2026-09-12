@@ -1,29 +1,63 @@
 import { createPublicClient } from "@/lib/supabase/public";
+import { buildSearchIndex } from "@/lib/orientation/interests";
+import { CATEGORIE_ORDER, PROFIL_ORDER, TYPE_DIPLOME_ORDER } from "@/lib/labels";
+
+export type CatalogInstitutionRef = {
+  id: string;
+  name: string;
+  sigle: string | null;
+};
 
 export type CatalogProgram = {
   id: string;
   name: string;
+  code: string;
   level: string;
-  domain: string | null;
-  specialty: string | null;
-  durationYears: number | null;
-  /** Champs rédactionnels : servent uniquement au test de complétude. */
-  description: string | null;
-  curriculum: string | null;
-  careerProspects: string | null;
-  institutionId: string;
-  institutionName: string;
-  city: string | null;
-  departmentName: string;
+  typeDiplome: string | null;
+  categorie: string | null;
+  /**
+   * Une formation peut être proposée par plusieurs établissements — c'est le
+   * cas de 14 intitulés partagés entre universités. D'où un tableau, et non
+   * un établissement unique comme dans l'ancien modèle par département.
+   */
+  institutions: CatalogInstitutionRef[];
+  profils: string[];
+  /** Intitulé + métiers, normalisé : sert au filtre par centre d'intérêt. */
+  searchIndex: string;
 };
 
+type Row = {
+  id: string;
+  name: string;
+  code: string;
+  level: string;
+  type_diplome_enum: string | null;
+  categorie: string | null;
+  program_institutions: Array<{
+    institutions: { id: string; name: string; sigle: string | null };
+  }>;
+  program_profils: Array<{ profil: string }>;
+  metiers: Array<{ libelle: string }>;
+};
+
+/** Trie selon un ordre de référence, les valeurs inconnues en fin de liste. */
+function byReference<T extends string>(reference: readonly T[]) {
+  return (a: string, b: string) => {
+    const ia = reference.indexOf(a as T);
+    const ib = reference.indexOf(b as T);
+    return (ia === -1 ? reference.length : ia) - (ib === -1 ? reference.length : ib);
+  };
+}
+
 /**
- * Toutes les formations publiées, avec leur établissement de rattachement.
+ * Toutes les formations du catalogue, avec leurs établissements et profils.
  *
- * Une seule requête : programs → departments → academic_units → institutions.
- * Les listes de domaines, niveaux et établissements sont dérivées du résultat
- * plutôt que codées en dur — un domaine absent de la base n'apparaît pas comme
- * filtre vide.
+ * Le rattachement passe par `program_institutions` : `department_id` est nul
+ * sur les 200 formations ParcourSup et l'ancienne chaîne
+ * programs → departments → academic_units → institutions ne renvoyait plus rien.
+ *
+ * Les listes de filtres sont dérivées du résultat, jamais codées en dur : une
+ * valeur absente de la base n'apparaît pas comme un filtre qui ne trouve rien.
  */
 export async function getCatalogPrograms() {
   const supabase = createPublicClient();
@@ -31,58 +65,51 @@ export async function getCatalogPrograms() {
   const { data } = await supabase
     .from("programs")
     .select(
-      "id, name, level, domain, specialty, duration_years, description, curriculum, career_prospects, departments!inner(name, academic_units!inner(institutions!inner(id, name, city)))"
+      `id, name, code, level, type_diplome_enum, categorie,
+       program_institutions ( institutions ( id, name, sigle ) ),
+       program_profils ( profil ),
+       metiers ( libelle )`
     )
     .order("name");
 
-  type Row = {
-    id: string;
-    name: string;
-    level: string;
-    domain: string | null;
-    specialty: string | null;
-    duration_years: number | null;
-    description: string | null;
-    curriculum: string | null;
-    career_prospects: string | null;
-    departments: {
-      name: string;
-      academic_units: {
-        institutions: { id: string; name: string; city: string | null };
-      };
-    };
-  };
-
   const programs: CatalogProgram[] = ((data ?? []) as unknown as Row[]).map((p) => {
-    const inst = p.departments.academic_units.institutions;
+    const metiers = (p.metiers ?? []).map((m) => m.libelle);
+
     return {
       id: p.id,
       name: p.name,
+      code: p.code,
       level: p.level,
-      domain: p.domain,
-      specialty: p.specialty,
-      durationYears: p.duration_years,
-      description: p.description,
-      curriculum: p.curriculum,
-      careerProspects: p.career_prospects,
-      institutionId: inst.id,
-      institutionName: inst.name,
-      city: inst.city,
-      departmentName: p.departments.name,
+      typeDiplome: p.type_diplome_enum,
+      categorie: p.categorie,
+      institutions: (p.program_institutions ?? [])
+        .map((link) => link.institutions)
+        .filter((i): i is CatalogInstitutionRef => Boolean(i))
+        .sort((a, b) => (a.sigle ?? a.name).localeCompare(b.sigle ?? b.name, "fr")),
+      profils: (p.program_profils ?? [])
+        .map((row) => row.profil)
+        .sort(byReference(PROFIL_ORDER)),
+      searchIndex: buildSearchIndex({ name: p.name, metiers }),
     };
   });
 
-  const domains = [
-    ...new Set(programs.map((p) => p.domain).filter((d): d is string => !!d)),
-  ].sort((a, b) => a.localeCompare(b, "fr"));
+  const typeDiplomes = [
+    ...new Set(programs.map((p) => p.typeDiplome).filter((t): t is string => !!t)),
+  ].sort(byReference(TYPE_DIPLOME_ORDER));
 
-  const levels = [...new Set(programs.map((p) => p.level))];
+  const categories = [
+    ...new Set(programs.map((p) => p.categorie).filter((c): c is string => !!c)),
+  ].sort(byReference(CATEGORIE_ORDER));
+
+  const profils = [...new Set(programs.flatMap((p) => p.profils))].sort(
+    byReference(PROFIL_ORDER)
+  );
 
   const institutions = [
     ...new Map(
-      programs.map((p) => [p.institutionId, { id: p.institutionId, name: p.institutionName }])
+      programs.flatMap((p) => p.institutions.map((i) => [i.id, i] as const))
     ).values(),
   ].sort((a, b) => a.name.localeCompare(b.name, "fr"));
 
-  return { programs, domains, levels, institutions };
+  return { programs, typeDiplomes, categories, profils, institutions };
 }

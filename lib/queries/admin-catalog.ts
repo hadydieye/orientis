@@ -40,7 +40,6 @@ export type AdminAcademicUnitRow = {
   type: string;
   institutionName: string;
   reviewStatus: string;
-  departmentCount: number;
 };
 
 export async function getAdminAcademicUnits(
@@ -51,7 +50,7 @@ export async function getAdminAcademicUnits(
   const { data } = await applyStatus(
     supabase
       .from("academic_units")
-      .select("id, name, type, review_status, institutions(name), departments(id)")
+      .select("id, name, type, review_status, institutions(name)")
       .order("name"),
     reviewStatus
   );
@@ -59,7 +58,6 @@ export async function getAdminAcademicUnits(
   type Row = {
     id: string; name: string; type: string; review_status: string;
     institutions: { name: string } | null;
-    departments: { id: string }[];
   };
 
   return ((data ?? []) as unknown as Row[]).map((u) => ({
@@ -68,49 +66,6 @@ export async function getAdminAcademicUnits(
     type: u.type,
     institutionName: u.institutions?.name ?? "—",
     reviewStatus: u.review_status,
-    departmentCount: u.departments.length,
-  }));
-}
-
-// =========================================================================
-// Départements
-// =========================================================================
-
-export type AdminDepartmentRow = {
-  id: string;
-  name: string;
-  unitName: string;
-  institutionName: string;
-  reviewStatus: string;
-  programCount: number;
-};
-
-export async function getAdminDepartments(
-  reviewStatus?: string
-): Promise<AdminDepartmentRow[]> {
-  const supabase = await createClient();
-
-  const { data } = await applyStatus(
-    supabase
-      .from("departments")
-      .select("id, name, review_status, academic_units(name, institutions(name)), programs(id)")
-      .order("name"),
-    reviewStatus
-  );
-
-  type Row = {
-    id: string; name: string; review_status: string;
-    academic_units: { name: string; institutions: { name: string } | null } | null;
-    programs: { id: string }[];
-  };
-
-  return ((data ?? []) as unknown as Row[]).map((d) => ({
-    id: d.id,
-    name: d.name,
-    unitName: d.academic_units?.name ?? "—",
-    institutionName: d.academic_units?.institutions?.name ?? "—",
-    reviewStatus: d.review_status,
-    programCount: d.programs.length,
   }));
 }
 
@@ -121,7 +76,9 @@ export async function getAdminDepartments(
 export type AdminProgramRow = {
   id: string;
   name: string;
-  departmentName: string;
+  code: string;
+  typeDiplome: string | null;
+  /** Sigles des établissements qui la proposent, ou « — » si aucun. */
   institutionName: string;
   level: string;
   reviewStatus: string;
@@ -135,27 +92,40 @@ export async function getAdminPrograms(
   const { data } = await applyStatus(
     supabase
       .from("programs")
-      .select("id, name, level, review_status, departments(name, academic_units(institutions(name)))")
+      .select(
+        `id, name, code, level, type_diplome_enum, review_status,
+         program_institutions(institutions(sigle, name))`
+      )
       .order("name"),
     reviewStatus
   );
 
   type Row = {
-    id: string; name: string; level: string; review_status: string;
-    departments: {
-      name: string;
-      academic_units: { institutions: { name: string } | null } | null;
-    } | null;
+    id: string; name: string; code: string; level: string;
+    type_diplome_enum: string | null; review_status: string;
+    program_institutions: Array<{
+      institutions: { sigle: string | null; name: string } | null;
+    }> | null;
   };
 
-  return ((data ?? []) as unknown as Row[]).map((p) => ({
-    id: p.id,
-    name: p.name,
-    departmentName: p.departments?.name ?? "—",
-    institutionName: p.departments?.academic_units?.institutions?.name ?? "—",
-    level: p.level,
-    reviewStatus: p.review_status,
-  }));
+  return ((data ?? []) as unknown as Row[]).map((p) => {
+    const sigles = (p.program_institutions ?? [])
+      .map((l) => l.institutions?.sigle ?? l.institutions?.name)
+      .filter((v): v is string => Boolean(v))
+      .sort((a, b) => a.localeCompare(b, "fr"));
+
+    return {
+      id: p.id,
+      name: p.name,
+      code: p.code,
+      typeDiplome: p.type_diplome_enum,
+      // « — » plutôt qu'une chaîne vide : les 2 cycles préparatoires n'ont
+      // aucun établissement, et l'absence doit se lire.
+      institutionName: sigles.length > 0 ? sigles.join(", ") : "—",
+      level: p.level,
+      reviewStatus: p.review_status,
+    };
+  });
 }
 
 // =========================================================================
@@ -272,14 +242,42 @@ export async function getInstitutionOptions(): Promise<Option[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("institutions")
-    .select("id, name, city")
+    .select("id, name, sigle, city")
     .eq("review_status", "approved")
     .order("name");
   return (data ?? []).map((i) => ({
     value: i.id,
-    label: i.name,
+    label: i.sigle ? `${i.sigle} — ${i.name}` : i.name,
     meta: i.city ?? undefined,
   }));
+}
+
+/**
+ * Liaisons N-N d'une formation, pour pré-remplir le formulaire.
+ *
+ * Deux requêtes séparées plutôt qu'un select imbriqué : ce sont deux tables
+ * indépendantes, et une erreur sur l'une ne doit pas vider l'autre.
+ */
+export async function getProgramRelations(programId: string): Promise<{
+  institutions: string[];
+  profils: string[];
+}> {
+  const supabase = await createClient();
+  const [links, profils] = await Promise.all([
+    supabase
+      .from("program_institutions")
+      .select("institution_id")
+      .eq("program_id", programId),
+    supabase
+      .from("program_profils")
+      .select("profil")
+      .eq("program_id", programId),
+  ]);
+
+  return {
+    institutions: (links.data ?? []).map((r) => r.institution_id),
+    profils: (profils.data ?? []).map((r) => r.profil),
+  };
 }
 
 export async function getAcademicUnitOptions(): Promise<Option[]> {
@@ -300,47 +298,38 @@ export async function getAcademicUnitOptions(): Promise<Option[]> {
     .sort((a, b) => a.group.localeCompare(b.group, "fr") || a.label.localeCompare(b.label, "fr"));
 }
 
-export async function getDepartmentOptions(): Promise<Option[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("departments")
-    .select("id, name, academic_units(name, institutions(name))")
-    .eq("review_status", "approved")
-    .order("name");
-
-  type Row = {
-    id: string; name: string;
-    academic_units: { name: string; institutions: { name: string } | null } | null;
-  };
-  return ((data ?? []) as unknown as Row[])
-    .map((d) => ({
-      value: d.id,
-      label: d.name,
-      group: d.academic_units?.institutions?.name ?? "Sans établissement",
-      meta: d.academic_units?.name,
-    }))
-    .sort((a, b) => a.group.localeCompare(b.group, "fr") || a.label.localeCompare(b.label, "fr"));
-}
-
 export async function getProgramOptions(): Promise<Option[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("programs")
-    .select("id, name, level, departments(academic_units(institutions(name)))")
+    .select(
+      "id, name, type_diplome_enum, program_institutions(institutions(sigle, name))"
+    )
     .eq("review_status", "approved")
     .order("name");
 
   type Row = {
-    id: string; name: string; level: string;
-    departments: { academic_units: { institutions: { name: string } | null } | null } | null;
+    id: string; name: string; type_diplome_enum: string | null;
+    program_institutions: Array<{
+      institutions: { sigle: string | null; name: string } | null;
+    }> | null;
   };
   return ((data ?? []) as unknown as Row[])
-    .map((p) => ({
-      value: p.id,
-      label: p.name,
-      group: p.departments?.academic_units?.institutions?.name ?? "Sans établissement",
-      meta: p.level,
-    }))
+    .map((p) => {
+      // Une formation peut relever de plusieurs établissements : on groupe sur
+      // le premier par ordre alphabétique, pour que l'option reste à une place
+      // stable dans la liste.
+      const sigles = (p.program_institutions ?? [])
+        .map((l) => l.institutions?.sigle ?? l.institutions?.name)
+        .filter((v): v is string => Boolean(v))
+        .sort((a, b) => a.localeCompare(b, "fr"));
+      return {
+        value: p.id,
+        label: p.name,
+        group: sigles[0] ?? "Sans établissement",
+        meta: p.type_diplome_enum ?? undefined,
+      };
+    })
     .sort((a, b) => a.group.localeCompare(b.group, "fr") || a.label.localeCompare(b.label, "fr"));
 }
 
@@ -379,24 +368,33 @@ export async function getSourceOptions(): Promise<Option[]> {
 export type CascadeTable =
   | "institutions"
   | "academic_units"
-  | "departments"
   | "programs"
   | "admission_requirements"
   | "fees";
 
 export type CascadeCounts = {
   academicUnits?: number;
-  departments?: number;
   programs?: number;
+  programInstitutions?: number;
   admissionRequirements?: number;
   fees?: number;
+  competences?: number;
+  metiers?: number;
+  secteurs?: number;
 };
 
 /**
  * Compte ce que la suppression emporterait, en suivant les `on delete cascade`
- * déclarés dans le schéma initial :
- *   institution -> academic_units -> departments -> programs
- *                                                -> admission_requirements + fees
+ * réellement déclarés :
+ *   institution -> academic_units
+ *               -> program_institutions (la liaison, pas la formation)
+ *   programs    -> competences / metiers / secteurs -> employeurs
+ *               -> admission_requirements + fees + program_institutions
+ *
+ * Différence importante avec l'ancien modèle : supprimer un établissement
+ * n'emporte PLUS les formations. La liaison N-N disparaît, la formation reste —
+ * elle peut être proposée par d'autres établissements. Les départements ont
+ * disparu du schéma.
  *
  * Les identifiants sont descendus niveau par niveau plutôt que devinés : les
  * chiffres affichés dans la modale sont donc de vrais comptes, pas une
@@ -407,43 +405,49 @@ export async function getCascadeCounts(
   id: string
 ): Promise<CascadeCounts> {
   const supabase = await createClient();
-  type ChildTable = "academic_units" | "departments" | "programs" | "admission_requirements" | "fees";
-  const ids = async (t: ChildTable, col: string, parents: string[]) => {
-    if (parents.length === 0) return [];
-    const { data } = await supabase.from(t).select("id").in(col, parents);
-    return (data ?? []).map((r) => r.id as string);
-  };
 
-  let unitIds: string[] = [];
-  let deptIds: string[] = [];
-  let progIds: string[] = [];
+  const countBy = async (
+    t: "academic_units" | "program_institutions" | "admission_requirements"
+      | "fees" | "competences" | "metiers" | "secteurs",
+    col: string,
+    value: string
+  ) => {
+    const { count } = await supabase
+      .from(t)
+      .select("*", { count: "exact", head: true })
+      .eq(col, value);
+    return count ?? 0;
+  };
 
   if (table === "institutions") {
-    unitIds = await ids("academic_units", "institution_id", [id]);
-    deptIds = await ids("departments", "academic_unit_id", unitIds);
-    progIds = await ids("programs", "department_id", deptIds);
-  } else if (table === "academic_units") {
-    deptIds = await ids("departments", "academic_unit_id", [id]);
-    progIds = await ids("programs", "department_id", deptIds);
-  } else if (table === "departments") {
-    progIds = await ids("programs", "department_id", [id]);
-  } else if (table === "programs") {
-    progIds = [id];
-  } else {
-    return {};
+    return {
+      academicUnits: await countBy("academic_units", "institution_id", id),
+      programInstitutions: await countBy(
+        "program_institutions",
+        "institution_id",
+        id
+      ),
+    };
   }
 
-  const reqs = await ids("admission_requirements", "program_id", progIds);
-  const fees = await ids("fees", "program_id", progIds);
+  if (table === "programs") {
+    return {
+      programInstitutions: await countBy("program_institutions", "program_id", id),
+      admissionRequirements: await countBy(
+        "admission_requirements",
+        "program_id",
+        id
+      ),
+      fees: await countBy("fees", "program_id", id),
+      competences: await countBy("competences", "program_id", id),
+      metiers: await countBy("metiers", "program_id", id),
+      secteurs: await countBy("secteurs", "program_id", id),
+    };
+  }
 
-  const out: CascadeCounts = {
-    admissionRequirements: reqs.length,
-    fees: fees.length,
-  };
-  if (table === "institutions") out.academicUnits = unitIds.length;
-  if (table === "institutions" || table === "academic_units") out.departments = deptIds.length;
-  if (table !== "programs") out.programs = progIds.length;
-  return out;
+  // academic_units n'a plus d'enfant depuis la suppression des départements ;
+  // admission_requirements et fees sont des feuilles.
+  return {};
 }
 
 /**

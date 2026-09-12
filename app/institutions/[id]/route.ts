@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { makeDeleteHandler, makeUpdateHandler } from "@/lib/api/crud";
 
-// GET /institutions/:id — academic_units -> departments -> programs imbriqués
+// GET /institutions/:id — formations rattachées via program_institutions.
+//
+// Les unités académiques sont toujours exposées, mais elles ne portent plus de
+// formation : le rattachement passe désormais par la table de liaison N-N.
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -12,7 +15,11 @@ export async function GET(
 
   const { data, error } = await supabase
     .from("institutions")
-    .select("*, academic_units(*, departments(*, programs(*)))")
+    .select(
+      `*,
+      academic_units(*),
+      program_institutions(programs(*, program_profils(profil)))`
+    )
     .eq("id", id)
     .single();
 

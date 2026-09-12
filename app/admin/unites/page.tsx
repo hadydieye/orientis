@@ -50,7 +50,6 @@ export default async function AdminAcademicUnitsPage({
             <Th>Établissement</Th>
             <Th>Type</Th>
             <Th>Statut</Th>
-            <Th align="right">Départements</Th>
             <Th align="right">Actions</Th>
           </HeadRow>
           <tbody>
@@ -60,7 +59,6 @@ export default async function AdminAcademicUnitsPage({
                 <td className="px-4 py-3 text-muted">{u.institutionName}</td>
                 <td className="px-4 py-3 text-muted">{TYPE_LABEL[u.type] ?? u.type}</td>
                 <td className="px-4 py-3"><ReviewBadge status={u.reviewStatus} /></td>
-                <td className="px-4 py-3 text-right tabular-nums">{u.departmentCount}</td>
                 <td className="px-4 py-3">
                   <RowActions
                     table="academic_units"

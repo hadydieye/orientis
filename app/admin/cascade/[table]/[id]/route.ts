@@ -5,7 +5,6 @@ import { getCascadeCounts, type CascadeTable } from "@/lib/queries/admin-catalog
 const TABLES: CascadeTable[] = [
   "institutions",
   "academic_units",
-  "departments",
   "programs",
   "admission_requirements",
   "fees",

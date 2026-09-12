@@ -1,0 +1,54 @@
+RAPPORT DE QUALITÉ — scraping ParcourSup Guinée
+Généré le 2026-09-11 03:22:02
+======================================================================
+
+Formations extraites        : 200
+Couples formation x IES     : 270
+Sigles d'établissement      : 18
+Compétences                 : 2399
+Métiers                     : 1000
+
+PAR CATÉGORIE
+  DUT & Cycle préparatoire..................... 16
+  Diplôme d'État & Ingénierie.................. 34
+  Licence...................................... 150
+
+PAR TYPE DE DIPLÔME
+  Cycle préparatoire........................... 2
+  DUT.......................................... 14
+  Diplôme d’ingénieur.......................... 28
+  Diplôme d’État............................... 6
+  Licence fondamentale......................... 26
+  Licence professionnelle...................... 124
+
+SIGLES D'ÉTABLISSEMENT RENCONTRÉS
+Les noms complets ne figurent pas sur ces pages. Ne les invente pas :
+complète-les depuis parcoursupguinee.org/institutions.
+  CPGE......................................... 2 offres
+  ESTH......................................... 4 offres
+  ISAMK Dubr................................... 10 offres
+  ISAU......................................... 5 offres
+  ISAV Faranah................................. 15 offres
+  ISCAEG....................................... 7 offres
+  ISIC......................................... 4 offres
+  ISMG Boké.................................... 15 offres
+  ISSEG........................................ 7 offres
+  ISSMV........................................ 9 offres
+  IST Mamou.................................... 11 offres
+  UGANC........................................ 49 offres
+  UGLCS........................................ 16 offres
+  UJNK......................................... 31 offres
+  UK........................................... 20 offres
+  UL........................................... 32 offres
+  UNG.......................................... 5 offres
+  UZ........................................... 28 offres
+
+PROFILS D'ENTRÉE RENCONTRÉS
+  SE, SE-FA, SM, SS, SS-FA
+
+ANOMALIES : 0 formation(s) concernée(s)
+  Aucune. Toutes les colonnes attendues sont remplies.
+
+INTITULÉS EN DOUBLE : 2
+  Licence fondamentale en Physique  ->  LIC-013, LIC-069
+  Licence fondamentale en Économie  ->  LIC-045, LIC-132

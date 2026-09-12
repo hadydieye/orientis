@@ -1,7 +1,9 @@
 import { Check } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-const STEPS = ["Série", "Moyenne", "Résultats"];
+// Deux étapes depuis que la moyenne au bac ne filtre plus rien : les
+// données ParcourSup 2026 ne publient aucun seuil d'admission.
+const STEPS = ["Profil d'entrée", "Résultats"];
 
 export function OrientationStepper({ current }: { current: number }) {
   return (

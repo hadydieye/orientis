@@ -1,9 +1,15 @@
 import { createPublicClient } from "@/lib/supabase/public";
+import { TYPE_DIPLOME_ORDER } from "@/lib/labels";
 
 export type HomeStats = {
   institutions: number;
   programs: number;
-  institutionsWithVerifiedRequirements: number;
+  /**
+   * Formations dont la fiche officielle ParcourSup est référencée par son URL.
+   * Remplace l'ancien « établissements à seuils vérifiés » : il reposait sur
+   * `admission_requirements`, table vidée avec les données 2025.
+   */
+  programsWithOfficialSource: number;
   cities: number;
   /** Institutions sans ville renseignée : comptées, jamais escamotées. */
   institutionsWithoutCity: number;
@@ -41,24 +47,17 @@ export async function getHomeData() {
     institutionsCount,
     programsCount,
     citiesRows,
-    verifiedRows,
-    programUnitRows,
+    programRows,
+    linkRows,
     institutionRows,
   ] = await Promise.all([
     supabase.from("institutions").select("*", { count: "exact", head: true }),
     supabase.from("programs").select("*", { count: "exact", head: true }),
     supabase.from("institutions").select("city"),
-    // Un seuil est "vérifié" quand la source qui le documente est elle-même
-    // marquée status='verifie'. On remonte jusqu'à l'institution.
-    supabase
-      .from("admission_requirements")
-      .select(
-        "id, sources!inner(status), programs!inner(departments!inner(academic_units!inner(institution_id)))"
-      )
-      .eq("sources.status", "verifie"),
-    supabase
-      .from("programs")
-      .select("id, departments!inner(academic_units!inner(name, institution_id))"),
+    supabase.from("programs").select("type_diplome_enum, url_source"),
+    // Le rattachement formation ↔ établissement passe désormais par la table
+    // de liaison N-N ; l'ancienne chaîne par département ne renvoyait plus rien.
+    supabase.from("program_institutions").select("institution_id"),
     supabase
       .from("institutions")
       .select("id, name, city, status, type, logo_url")
@@ -82,35 +81,35 @@ export async function getHomeData() {
   const mappedInstitutions =
     cityCounts.reduce((n, c) => n + c.institutionCount, 0) + withoutCity;
 
-  type VerifiedRow = {
-    programs: { departments: { academic_units: { institution_id: string } } };
-  };
-  const verifiedInstitutions = new Set(
-    ((verifiedRows.data ?? []) as unknown as VerifiedRow[]).map(
-      (r) => r.programs.departments.academic_units.institution_id
-    )
-  );
+  const programs = programRows.data ?? [];
 
-  type ProgramUnitRow = {
-    departments: { academic_units: { name: string; institution_id: string } };
-  };
-  const programUnits = (programUnitRows.data ?? []) as unknown as ProgramUnitRow[];
-
-  const byCategory = new Map<string, number>();
-  const byInstitution = new Map<string, number>();
-  for (const row of programUnits) {
-    const unit = row.departments.academic_units;
-    byCategory.set(unit.name, (byCategory.get(unit.name) ?? 0) + 1);
-    byInstitution.set(
-      unit.institution_id,
-      (byInstitution.get(unit.institution_id) ?? 0) + 1
+  // Les catégories affichées sur l'accueil sont les types de diplôme : c'est
+  // le seul axe de regroupement renseigné sur les 200 formations.
+  const byType = new Map<string, number>();
+  for (const program of programs) {
+    if (!program.type_diplome_enum) continue;
+    byType.set(
+      program.type_diplome_enum,
+      (byType.get(program.type_diplome_enum) ?? 0) + 1
     );
   }
 
-  const categories: Category[] = [...byCategory.entries()]
+  const categories: Category[] = [...byType.entries()]
     .map(([name, programCount]) => ({ name, programCount }))
-    .sort((a, b) => b.programCount - a.programCount || a.name.localeCompare(b.name))
-    .slice(0, 5);
+    .sort(
+      (a, b) =>
+        b.programCount - a.programCount ||
+        TYPE_DIPLOME_ORDER.indexOf(a.name as (typeof TYPE_DIPLOME_ORDER)[number]) -
+          TYPE_DIPLOME_ORDER.indexOf(b.name as (typeof TYPE_DIPLOME_ORDER)[number])
+    );
+
+  const byInstitution = new Map<string, number>();
+  for (const link of linkRows.data ?? []) {
+    byInstitution.set(
+      link.institution_id,
+      (byInstitution.get(link.institution_id) ?? 0) + 1
+    );
+  }
 
   const institutions = institutionRows.data ?? [];
   const popularInstitutions: PopularInstitution[] = institutions
@@ -129,7 +128,7 @@ export async function getHomeData() {
   const stats: HomeStats = {
     institutions: institutionsCount.count ?? 0,
     programs: programsCount.count ?? 0,
-    institutionsWithVerifiedRequirements: verifiedInstitutions.size,
+    programsWithOfficialSource: programs.filter((p) => p.url_source).length,
     cities: byCity.size,
     institutionsWithoutCity: withoutCity,
     mappedInstitutions,

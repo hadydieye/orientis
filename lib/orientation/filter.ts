@@ -1,4 +1,4 @@
-import { INTEREST_TO_DOMAINS } from "@/lib/orientation/score";
+import { matchesInterests } from "@/lib/orientation/interests";
 
 /**
  * Filtrage des recommandations sur les critères d'affinement.
@@ -9,45 +9,53 @@ import { INTEREST_TO_DOMAINS } from "@/lib/orientation/score";
  * sinon « affiner » ne veut rien dire, la liste reste la même dans un autre
  * ordre.
  *
- * Les deux critères se combinent en ET : demander « Conakry » ET « Santé »
+ * Les critères se combinent en ET : demander « Conakry » ET « Santé »
  * signifie les deux à la fois, comme n'importe quel filtre. Quand cette
  * intersection est vide, l'appelant doit se rabattre sur la liste complète
  * plutôt que d'afficher un écran vide — voir `explainEmptyResult`.
+ *
+ * Aucun critère non déclaré n'écarte quoi que ce soit : sans ville, sans
+ * intérêt et sans catégorie, la liste passe entière. C'est ce qui garantit
+ * qu'une formation ne peut jamais devenir définitivement invisible.
  */
 
 export type RefineCriteria = {
   city: string | null;
   interests: string[];
+  categorie: string | null;
 };
 
 export type FilterableProgram = {
-  institution: { city: string | null };
-  domain: string | null;
+  /** Villes des établissements qui la proposent — vide si aucun rattachement. */
+  institutionCities: string[];
+  categorie: string | null;
+  /** Intitulé + métiers, normalisé. */
+  searchIndex: string;
 };
 
-export const EMPTY_CRITERIA: RefineCriteria = { city: null, interests: [] };
+export const EMPTY_CRITERIA: RefineCriteria = {
+  city: null,
+  interests: [],
+  categorie: null,
+};
 
 /** true dès qu'au moins un critère est déclaré. */
 export function hasActiveCriteria(c: RefineCriteria): boolean {
-  return Boolean(c.city) || c.interests.length > 0;
-}
-
-/** Domaines visés par les intérêts cochés, via la table publiée sur /orientation/score. */
-export function targetDomains(interests: string[]): Set<string> {
-  return new Set(interests.flatMap((i) => INTEREST_TO_DOMAINS[i] ?? []));
+  return Boolean(c.city) || c.interests.length > 0 || Boolean(c.categorie);
 }
 
 /** Détail par critère : sert aussi à expliquer un résultat vide. */
 export function matchDetail(p: FilterableProgram, c: RefineCriteria) {
-  const cityOk = c.city ? p.institution.city === c.city : null;
+  const cityOk = c.city ? p.institutionCities.includes(c.city) : null;
   const interestOk =
-    c.interests.length > 0
-      ? Boolean(p.domain && targetDomains(c.interests).has(p.domain))
-      : null;
+    c.interests.length > 0 ? matchesInterests(p.searchIndex, c.interests) : null;
+  const categorieOk = c.categorie ? p.categorie === c.categorie : null;
+
   return {
     cityOk,
     interestOk,
-    matches: (cityOk ?? true) && (interestOk ?? true),
+    categorieOk,
+    matches: (cityOk ?? true) && (interestOk ?? true) && (categorieOk ?? true),
   };
 }
 
@@ -62,33 +70,42 @@ export function filterRecommendations<T extends FilterableProgram>(
 /**
  * Pourquoi l'intersection est vide, en nommant le critère fautif.
  *
- * Un message générique laisserait croire à un bug. Le champ `domain` étant
- * renseigné sur une poignée de formations seulement, c'est presque toujours
- * le critère « intérêts » qui vide la liste — le dire évite de faire porter
- * le soupçon au filtre lui-même.
+ * Un message générique laisserait croire à un bug : on compte donc ce que
+ * chaque critère aurait retenu seul, et on nomme celui qui vide la liste.
  */
 export function explainEmptyResult<T extends FilterableProgram>(
   list: T[],
   c: RefineCriteria
 ): string {
-  const cityOnly = c.city ? list.filter((p) => p.institution.city === c.city).length : null;
-  const interestOnly =
-    c.interests.length > 0
-      ? list.filter((p) => p.domain && targetDomains(c.interests).has(p.domain)).length
-      : null;
-  const withDomain = list.filter((p) => p.domain).length;
+  const counts: Array<{ label: string; kept: number }> = [];
 
-  if (interestOnly === 0 && withDomain === 0) {
-    return `Aucune des ${list.length} formations retenues n'a de domaine renseigné : ce critère ne peut donc rien sélectionner pour l'instant.`;
+  if (c.city) {
+    counts.push({
+      label: `proposées à ${c.city}`,
+      kept: list.filter((p) => p.institutionCities.includes(c.city!)).length,
+    });
   }
-  if (interestOnly === 0 && withDomain < list.length) {
-    return `Le domaine n'est renseigné que sur ${withDomain} de ces ${list.length} formations, et aucune ne relève de vos centres d'intérêt.`;
+  if (c.interests.length > 0) {
+    counts.push({
+      label: `correspondant à ${c.interests.join(", ")}`,
+      kept: list.filter((p) => matchesInterests(p.searchIndex, c.interests)).length,
+    });
   }
-  if (cityOnly === 0) {
-    return `Aucune des formations retenues pour votre série et votre moyenne n'est proposée à ${c.city}.`;
+  if (c.categorie) {
+    counts.push({
+      label: `de catégorie « ${c.categorie} »`,
+      kept: list.filter((p) => p.categorie === c.categorie).length,
+    });
   }
-  if (cityOnly !== null && interestOnly !== null) {
-    return `${cityOnly} formation(s) correspondent à la ville et ${interestOnly} au domaine, mais aucune ne remplit les deux à la fois.`;
+
+  const blocking = counts.filter((x) => x.kept === 0);
+  if (blocking.length > 0) {
+    return `Aucune des ${list.length} formations ouvertes à votre profil n'est ${blocking
+      .map((x) => x.label)
+      .join(", ni ")}.`;
   }
-  return "Aucune formation ne remplit ces critères parmi celles retenues pour votre série et votre moyenne.";
+
+  return `Pris séparément, chaque critère retient des formations (${counts
+    .map((x) => `${x.kept} ${x.label}`)
+    .join(", ")}), mais aucune ne les remplit tous à la fois.`;
 }

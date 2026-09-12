@@ -6,6 +6,53 @@ export const LEVEL_LABEL: Record<string, string> = {
   autre: "Hors LMD",
 };
 
+/**
+ * Profils d'entrée ParcourSup Guinée — séries du baccalauréat.
+ *
+ * « FA » = Franco-Arabe, une série à part entière du bac guinéen, et non une
+ * modalité d'alternance. Les profils ne se recoupent donc PAS : un bachelier
+ * SS ne peut pas candidater aux formations réservées SS-FA, et inversement.
+ * Tout filtrage doit rester strict sur le profil choisi.
+ */
+export const PROFIL_LABEL: Record<string, string> = {
+  SM: "Sciences Mathématiques",
+  SE: "Sciences Expérimentales",
+  SS: "Sciences Sociales",
+  "SE-FA": "Sciences Expérimentales — Franco-Arabe",
+  "SS-FA": "Sciences Sociales — Franco-Arabe",
+};
+
+/** Ordre d'affichage des profils, identique partout où ils sont proposés. */
+export const PROFIL_ORDER = ["SM", "SE", "SS", "SE-FA", "SS-FA"] as const;
+
+/** Les trois catégories de l'offre ParcourSup 2026. */
+export const CATEGORIE_ORDER = [
+  "Licence",
+  "Diplôme d'État & Ingénierie",
+  "DUT & Cycle préparatoire",
+] as const;
+
+/** Ordre de lecture des types de diplôme, du plus court au plus long. */
+export const TYPE_DIPLOME_ORDER = [
+  "Cycle préparatoire",
+  "DUT",
+  "Licence fondamentale",
+  "Licence professionnelle",
+  "Diplôme d’ingénieur",
+  "Diplôme d’État",
+] as const;
+
+export const INSTITUTION_TYPE_LABEL: Record<string, string> = {
+  public: "Public",
+  prive: "Privé",
+};
+
+export const INSTITUTION_STATUS_LABEL: Record<string, string> = {
+  universite: "Université",
+  institut: "Institut",
+  ecole: "École",
+};
+
 export const LANGUAGE_LABEL: Record<string, string> = {
   fr: "Français",
   en: "Anglais",

@@ -1,28 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-// GET /recommendations?series=&average=
+/** Les cinq profils d'entrée publiés par ParcourSup Guinée. */
+const PROFILS = ["SM", "SE", "SS", "SE-FA", "SS-FA"] as const;
+type Profil = (typeof PROFILS)[number];
+
+// GET /recommendations?profil=
+//
+// `series` et `average` ont disparu avec les données 2025 : aucun seuil
+// d'admission n'est publié pour 2026, la fonction Postgres ne filtre plus que
+// sur le profil d'entrée.
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const series = searchParams.get("series");
-  const averageParam = searchParams.get("average");
+  const profil = searchParams.get("profil");
 
-  if (!series || !averageParam) {
+  if (!profil) {
     return NextResponse.json(
-      { error: "Les paramètres 'series' et 'average' sont requis." },
+      { error: "Le paramètre 'profil' est requis." },
       { status: 400 }
     );
   }
 
-  const average = Number(averageParam);
-  if (Number.isNaN(average)) {
-    return NextResponse.json({ error: "'average' doit être un nombre." }, { status: 400 });
+  if (!PROFILS.includes(profil as Profil)) {
+    return NextResponse.json(
+      { error: `'profil' doit valoir l'un de : ${PROFILS.join(", ")}.` },
+      { status: 400 }
+    );
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("recommend_programs", {
-    p_series: series,
-    p_average: average,
+    p_profil: profil as Profil,
   });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });

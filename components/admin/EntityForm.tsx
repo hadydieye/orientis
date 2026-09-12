@@ -173,6 +173,8 @@ export function EntityForm({
   rowId,
   backHref,
   submitLabel,
+  relationFields = [],
+  relationPath,
 }: {
   fields: FieldSpec[];
   initial: FormValues;
@@ -182,6 +184,14 @@ export function EntityForm({
   rowId?: string;
   backHref: string;
   submitLabel?: string;
+  /**
+   * Champs qui ne sont PAS des colonnes de `table` mais des liaisons N-N
+   * (program_institutions, program_profils). Ils sont retirés du corps
+   * principal et envoyés à `relationPath` une fois la ligne écrite.
+   */
+  relationFields?: string[];
+  /** Gabarit d'URL, `{id}` remplacé par l'id de la ligne. */
+  relationPath?: string;
 }) {
   const router = useRouter();
   const [values, setValues] = useState<FormValues>(initial);
@@ -211,7 +221,14 @@ export function EntityForm({
     };
 
     const payload: Record<string, unknown> = {};
+    const relations: Record<string, string[]> = {};
     for (const [k, v] of Object.entries(values)) {
+      // Les liaisons partent dans une seconde requête : les laisser dans le
+      // corps principal ferait échouer l'insert sur une colonne inconnue.
+      if (relationFields.includes(k)) {
+        relations[k] = Array.isArray(v) ? v : v ? [v] : [];
+        continue;
+      }
       if (Array.isArray(v)) {
         if (v.length > 0) payload[k] = v;
         else if (isEdit && wasFilled(k)) payload[k] = null;
@@ -237,6 +254,32 @@ export function EntityForm({
         setPending(false);
         return;
       }
+
+      // Les liaisons sont écrites APRÈS la ligne : en création, leur id de
+      // rattachement n'existe qu'une fois l'insert accepté.
+      if (relationPath && Object.keys(relations).length > 0) {
+        const saved = await res.json().catch(() => null);
+        const targetId = rowId ?? saved?.id;
+        if (!targetId) {
+          setError("La formation a été enregistrée, mais son identifiant n'a pas été renvoyé : les rattachements n'ont pas pu être écrits.");
+          setPending(false);
+          return;
+        }
+        const relRes = await fetch(relationPath.replace("{id}", targetId), {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(relations),
+        });
+        if (!relRes.ok) {
+          const relBody = await relRes.json().catch(() => ({}));
+          setError(
+            `La formation est enregistrée, mais les rattachements ont échoué : ${relBody.error ?? relRes.status}`
+          );
+          setPending(false);
+          return;
+        }
+      }
+
       router.push(backHref);
       router.refresh();
     } catch {

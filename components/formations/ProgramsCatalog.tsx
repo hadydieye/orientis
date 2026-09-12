@@ -2,32 +2,25 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Info, SearchX } from "lucide-react";
+import { SearchX } from "lucide-react";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { GlassInput } from "@/components/ui/GlassInput";
 import { GlassSelect } from "@/components/ui/GlassSelect";
 import { ProgramListCard } from "@/components/formations/ProgramListCard";
-import { LEVEL_LABEL } from "@/lib/labels";
+import { PROFIL_LABEL } from "@/lib/labels";
+import { normalizeText } from "@/lib/orientation/interests";
 import { cn } from "@/lib/cn";
 import type { CatalogProgram } from "@/lib/queries/programs";
 
 const ALL = "tous";
-/** Valeur réservée : les formations dont le domaine n'est pas renseigné. */
-const NO_DOMAIN = "__sans__";
 
-type SortKey = "nom" | "etablissement" | "niveau";
+type SortKey = "nom" | "etablissement" | "type";
 
 const SORTS: Array<{ value: SortKey; label: string }> = [
   { value: "nom", label: "Nom (A→Z)" },
   { value: "etablissement", label: "Établissement" },
-  { value: "niveau", label: "Niveau" },
+  { value: "type", label: "Type de diplôme" },
 ];
-
-const LEVEL_ORDER = ["licence", "master", "doctorat", "bts", "autre"];
-
-function normalize(value: string) {
-  return value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
-}
 
 function Pill({
   active, ...props
@@ -48,23 +41,28 @@ function Pill({
 }
 
 export function ProgramsCatalog({
-  programs, domains, levels, institutions,
+  programs, typeDiplomes, categories, profils, institutions,
 }: {
   programs: CatalogProgram[];
-  domains: string[];
-  levels: string[];
-  institutions: Array<{ id: string; name: string }>;
+  typeDiplomes: string[];
+  categories: string[];
+  profils: string[];
+  institutions: Array<{ id: string; name: string; sigle: string | null }>;
 }) {
   const params = useSearchParams();
 
   const [query, setQuery] = useState(() => params.get("q") ?? "");
-  const [level, setLevel] = useState(() => {
-    const v = params.get("niveau");
-    return v && levels.includes(v) ? v : ALL;
+  const [typeDiplome, setTypeDiplome] = useState(() => {
+    const v = params.get("diplome");
+    return v && typeDiplomes.includes(v) ? v : ALL;
   });
-  const [domain, setDomain] = useState(() => {
-    const v = params.get("domaine");
-    return v && (domains.includes(v) || v === NO_DOMAIN) ? v : ALL;
+  const [categorie, setCategorie] = useState(() => {
+    const v = params.get("categorie");
+    return v && categories.includes(v) ? v : ALL;
+  });
+  const [profil, setProfil] = useState(() => {
+    const v = params.get("profil");
+    return v && profils.includes(v) ? v : ALL;
   });
   const [institution, setInstitution] = useState(() => {
     const v = params.get("etablissement");
@@ -72,7 +70,7 @@ export function ProgramsCatalog({
   });
   const [sort, setSort] = useState<SortKey>(() => {
     const v = params.get("tri");
-    return v === "etablissement" || v === "niveau" ? v : "nom";
+    return v === "etablissement" || v === "type" ? v : "nom";
   });
 
   // History API : l'URL reste partageable sans navigation ni re-fetch serveur.
@@ -89,51 +87,64 @@ export function ProgramsCatalog({
     );
   }
 
-  const withoutDomain = useMemo(
-    () => programs.filter((p) => !p.domain).length,
-    [programs]
-  );
-
   const filtered = useMemo(() => {
-    const q = normalize(query.trim());
+    // La recherche est normalisée des deux côtés : « Genie civil » et
+    // « génie civil » donnent le même résultat.
+    const q = normalizeText(query);
 
     const result = programs.filter((p) => {
-      if (level !== ALL && p.level !== level) return false;
-      if (domain === NO_DOMAIN && p.domain) return false;
-      if (domain !== ALL && domain !== NO_DOMAIN && p.domain !== domain) return false;
-      if (institution !== ALL && p.institutionId !== institution) return false;
+      if (typeDiplome !== ALL && p.typeDiplome !== typeDiplome) return false;
+      if (categorie !== ALL && p.categorie !== categorie) return false;
+      if (profil !== ALL && !p.profils.includes(profil)) return false;
+      if (
+        institution !== ALL &&
+        !p.institutions.some((i) => i.id === institution)
+      )
+        return false;
       if (!q) return true;
       return (
-        normalize(p.name).includes(q) ||
-        normalize(p.specialty ?? "").includes(q) ||
-        normalize(p.departmentName).includes(q) ||
-        normalize(p.institutionName).includes(q)
+        normalizeText(p.name).includes(q) ||
+        normalizeText(p.code).includes(q) ||
+        p.institutions.some(
+          (i) =>
+            normalizeText(i.name).includes(q) ||
+            normalizeText(i.sigle).includes(q)
+        )
       );
     });
+
+    const firstSigle = (p: CatalogProgram) =>
+      p.institutions[0]?.sigle ?? p.institutions[0]?.name ?? "￿";
 
     return result.sort((a, b) => {
       if (sort === "etablissement") {
         return (
-          a.institutionName.localeCompare(b.institutionName, "fr") ||
+          firstSigle(a).localeCompare(firstSigle(b), "fr") ||
           a.name.localeCompare(b.name, "fr")
         );
       }
-      if (sort === "niveau") {
+      if (sort === "type") {
         return (
-          LEVEL_ORDER.indexOf(a.level) - LEVEL_ORDER.indexOf(b.level) ||
+          typeDiplomes.indexOf(a.typeDiplome ?? "") -
+            typeDiplomes.indexOf(b.typeDiplome ?? "") ||
           a.name.localeCompare(b.name, "fr")
         );
       }
       return a.name.localeCompare(b.name, "fr");
     });
-  }, [programs, query, level, domain, institution, sort]);
+  }, [programs, query, typeDiplome, categorie, profil, institution, sort, typeDiplomes]);
 
   const hasActiveFilters =
-    query !== "" || level !== ALL || domain !== ALL || institution !== ALL;
+    query !== "" ||
+    typeDiplome !== ALL ||
+    categorie !== ALL ||
+    profil !== ALL ||
+    institution !== ALL;
 
   function reset() {
-    setQuery(""); setLevel(ALL); setDomain(ALL); setInstitution(ALL);
-    syncUrl({ q: "", niveau: "", domaine: "", etablissement: "" });
+    setQuery(""); setTypeDiplome(ALL); setCategorie(ALL);
+    setProfil(ALL); setInstitution(ALL);
+    syncUrl({ q: "", diplome: "", categorie: "", profil: "", etablissement: "" });
   }
 
   return (
@@ -145,7 +156,7 @@ export function ProgramsCatalog({
               type="search"
               value={query}
               onChange={(e) => { setQuery(e.target.value); syncUrl({ q: e.target.value }); }}
-              placeholder="Rechercher une formation, un département, un établissement..."
+              placeholder="Rechercher une formation, un code, un établissement..."
               aria-label="Rechercher une formation"
             />
           </div>
@@ -168,14 +179,21 @@ export function ProgramsCatalog({
         <div
           className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
           role="group"
-          aria-label="Filtrer par niveau"
+          aria-label="Filtrer par type de diplôme"
         >
-          <Pill active={level === ALL} onClick={() => { setLevel(ALL); syncUrl({ niveau: "" }); }}>
-            Tous les niveaux
+          <Pill
+            active={typeDiplome === ALL}
+            onClick={() => { setTypeDiplome(ALL); syncUrl({ diplome: "" }); }}
+          >
+            Tous les diplômes
           </Pill>
-          {levels.map((l) => (
-            <Pill key={l} active={level === l} onClick={() => { setLevel(l); syncUrl({ niveau: l }); }}>
-              {LEVEL_LABEL[l] ?? l}
+          {typeDiplomes.map((t) => (
+            <Pill
+              key={t}
+              active={typeDiplome === t}
+              onClick={() => { setTypeDiplome(t); syncUrl({ diplome: t }); }}
+            >
+              {t}
             </Pill>
           ))}
         </div>
@@ -190,37 +208,39 @@ export function ProgramsCatalog({
             >
               <option value={ALL}>Tous les établissements ({institutions.length})</option>
               {institutions.map((i) => (
-                <option key={i.id} value={i.id}>{i.name}</option>
+                <option key={i.id} value={i.id}>
+                  {i.sigle ? `${i.sigle} — ${i.name}` : i.name}
+                </option>
               ))}
             </GlassSelect>
           </div>
           <div className="sm:w-72">
-            <label className="sr-only" htmlFor="filtre-domaine">Domaine</label>
+            <label className="sr-only" htmlFor="filtre-categorie">Catégorie</label>
             <GlassSelect
-              id="filtre-domaine"
-              value={domain}
-              onChange={(e) => { setDomain(e.target.value); syncUrl({ domaine: e.target.value }); }}
+              id="filtre-categorie"
+              value={categorie}
+              onChange={(e) => { setCategorie(e.target.value); syncUrl({ categorie: e.target.value }); }}
             >
-              <option value={ALL}>Tous les domaines</option>
-              {domains.map((d) => (
-                <option key={d} value={d}>{d}</option>
+              <option value={ALL}>Toutes les catégories</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>{c}</option>
               ))}
-              <option value={NO_DOMAIN}>Domaine non renseigné ({withoutDomain})</option>
+            </GlassSelect>
+          </div>
+          <div className="sm:w-72">
+            <label className="sr-only" htmlFor="filtre-profil">Profil d&apos;entrée</label>
+            <GlassSelect
+              id="filtre-profil"
+              value={profil}
+              onChange={(e) => { setProfil(e.target.value); syncUrl({ profil: e.target.value }); }}
+            >
+              <option value={ALL}>Tous les profils d&apos;entrée</option>
+              {profils.map((p) => (
+                <option key={p} value={p}>{PROFIL_LABEL[p] ?? p}</option>
+              ))}
             </GlassSelect>
           </div>
         </div>
-
-        {/* Le champ domain n'est presque jamais rempli : le dire évite de
-            faire passer un manque de données pour un filtre cassé. */}
-        {withoutDomain > 0 && (
-          <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-dark">
-            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-            Le domaine n&apos;est renseigné que sur {programs.length - withoutDomain} formation
-            {programs.length - withoutDomain > 1 ? "s" : ""} sur {programs.length} : filtrer
-            par domaine masque donc l&apos;essentiel du catalogue. Le filtre par
-            établissement est plus fiable en attendant que ce champ soit complété.
-          </p>
-        )}
       </div>
 
       <p className="text-sm text-muted" aria-live="polite">
@@ -235,7 +255,7 @@ export function ProgramsCatalog({
           <h2 className="mt-4 font-semibold">Aucune formation trouvée</h2>
           <p className="mt-2 max-w-sm text-sm text-muted">
             Aucun résultat ne correspond à cette combinaison de filtres. Essaie
-            un autre niveau, un autre établissement, ou une recherche plus large.
+            un autre diplôme, un autre établissement, ou une recherche plus large.
           </p>
           {hasActiveFilters && (
             <GlassButton variant="secondary" className="mt-6" onClick={reset}>

@@ -1,12 +1,22 @@
 import Link from "next/link";
-import { ArrowRight, Check, ChevronRight, HelpCircle, MapPin, Minus, X } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  Check,
+  ChevronRight,
+  ExternalLink,
+  HelpCircle,
+  MapPin,
+  Minus,
+  X,
+} from "lucide-react";
 import { GlassBadge } from "@/components/ui/GlassBadge";
-import { ReliabilityTag } from "@/components/program/SourceReliability";
-import { LEVEL_LABEL } from "@/lib/labels";
-import { LimitedInfoBadge } from "@/components/program/LimitedInfoBadge";
 import type { Recommendation } from "@/app/(site)/orientation/actions";
 
 import type { ScoreCriterion } from "@/lib/orientation/score";
+
+/** Au-delà, la carte devient une liste de métiers plutôt qu'un aperçu. */
+const METIERS_PREVIEW = 4;
 
 /**
  * Une ligne de critère, avec l'icône de son état.
@@ -45,34 +55,43 @@ function CriterionRow({ criterion }: { criterion: ScoreCriterion }) {
 
 export function RecommendationCard({
   recommendation,
-  series,
-  average,
 }: {
   recommendation: Recommendation;
-  series: string;
-  average: number;
 }) {
-  const { minAverage, acceptedSeries, source, score } = recommendation;
+  const { score, institutions, metiers } = recommendation;
 
   return (
     <article className="flex flex-col gap-4 rounded-card border border-glass-border bg-glass-1 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h3 className="font-semibold leading-snug">{recommendation.name}</h3>
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-            <Link
-              href={`/etablissements/${recommendation.institution.id}`}
-              className="rounded text-secondary outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              {recommendation.institution.name}
-            </Link>
-            {recommendation.institution.city && (
-              <span className="inline-flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5" aria-hidden />
-                {recommendation.institution.city}
-              </span>
-            )}
-          </p>
+
+          {institutions.length === 0 ? (
+            <p className="text-sm text-muted-dark">
+              Aucun établissement rattaché dans les données officielles
+            </p>
+          ) : (
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+              {institutions.map((institution, index) => (
+                <span key={institution.id} className="inline-flex items-center gap-2">
+                  {index > 0 && <span aria-hidden>·</span>}
+                  <Link
+                    href={`/etablissements/${institution.id}`}
+                    title={institution.name}
+                    className="rounded text-secondary outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    {institution.sigle ?? institution.name}
+                  </Link>
+                  {institution.city && (
+                    <span className="inline-flex items-center gap-1 text-muted">
+                      <MapPin className="h-3.5 w-3.5" aria-hidden />
+                      {institution.city}
+                    </span>
+                  )}
+                </span>
+              ))}
+            </p>
+          )}
         </div>
 
         {/* Un compte de points, jamais un pourcentage : chaque point est
@@ -92,19 +111,33 @@ export function RecommendationCard({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <GlassBadge variant="neutral">
-          {LEVEL_LABEL[recommendation.level] ?? recommendation.level}
-        </GlassBadge>
-        {recommendation.durationYears !== null && (
-          <GlassBadge variant="neutral">
-            {recommendation.durationYears} an
-            {recommendation.durationYears > 1 ? "s" : ""}
-          </GlassBadge>
+        {recommendation.typeDiplome && (
+          <GlassBadge variant="neutral">{recommendation.typeDiplome}</GlassBadge>
         )}
-        {/* Traçabilité visible sur chaque carte, à côté des critères. */}
-        <ReliabilityTag source={source} />
-        {recommendation.limitedInfo && <LimitedInfoBadge />}
+        {recommendation.categorie && (
+          <GlassBadge variant="neutral">{recommendation.categorie}</GlassBadge>
+        )}
       </div>
+
+      {metiers.length > 0 && (
+        <ul className="flex flex-wrap gap-2">
+          {metiers.slice(0, METIERS_PREVIEW).map((metier, index) => (
+            <li
+              key={`${index}-${metier}`}
+              className="flex items-center gap-1.5 rounded-pill border border-glass-border bg-glass-2 px-2.5 py-1 text-xs text-muted"
+            >
+              <Briefcase className="h-3 w-3 shrink-0" aria-hidden />
+              {metier}
+            </li>
+          ))}
+          {metiers.length > METIERS_PREVIEW && (
+            <li className="px-1 py-1 text-xs text-muted-dark">
+              +{metiers.length - METIERS_PREVIEW} autre
+              {metiers.length - METIERS_PREVIEW > 1 ? "s" : ""}
+            </li>
+          )}
+        </ul>
+      )}
 
       <ul className="flex flex-col gap-2">
         {score.criteria.map((c) => (
@@ -122,40 +155,32 @@ export function RecommendationCard({
         </summary>
         <div className="mt-3 flex flex-col gap-3 border-t border-glass-border pt-3">
           <p className="text-sm leading-relaxed text-muted">
-            Cette formation est proposée parce que votre série{" "}
-            <strong className="text-foreground">{series}</strong> figure parmi
-            les séries acceptées
-            {acceptedSeries && acceptedSeries.length > 0
-              ? ` (${acceptedSeries.join(", ")})`
-              : ""}
-            {minAverage !== null ? (
-              <>
-                , et parce que votre moyenne de{" "}
-                <strong className="text-foreground">{average}/20</strong>{" "}
-                atteint le seuil enregistré de{" "}
-                <strong className="text-foreground">{minAverage}/20</strong>.
-              </>
-            ) : (
-              <>
-                . Aucune moyenne minimale n&apos;est enregistrée pour cette
-                formation : elle n&apos;a donc pas été écartée sur ce critère,
-                mais cela ne garantit pas votre admission.
-              </>
-            )}
+            Cette formation apparaît parce que le portail officiel la déclare
+            ouverte à votre profil d&apos;entrée. Les points ci-dessus ne
+            comptent que vos préférences déclarées : aucune condition
+            d&apos;admission chiffrée n&apos;est publiée par la source, donc
+            aucune n&apos;est affichée ici.
           </p>
-          {source && (
-            <p className="flex flex-wrap items-center gap-2 text-xs text-muted-dark">
-              Seuil issu de : {source.label}
-              <ReliabilityTag source={source} />
-            </p>
-          )}
-          <Link
-            href={`/formations/${recommendation.id}`}
-            className="inline-flex w-fit items-center gap-1.5 rounded text-sm text-secondary outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            Voir la fiche complète
-            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              href={`/formations/${recommendation.id}`}
+              className="inline-flex w-fit items-center gap-1.5 rounded text-sm text-secondary outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              Voir la fiche complète
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+            {recommendation.urlSource && (
+              <a
+                href={recommendation.urlSource}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-fit items-center gap-1.5 rounded text-sm text-secondary outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                Fiche officielle
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+              </a>
+            )}
+          </div>
         </div>
       </details>
     </article>
