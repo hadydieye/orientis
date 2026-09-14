@@ -12,6 +12,7 @@ const links = [
   { label: "Établissements", href: "/explorer" },
   { label: "Formations", href: "/formations" },
   { label: "Orientation", href: "/orientation" },
+  { label: "Conseiller", href: "/conseiller" },
   { label: "À propos", href: "/a-propos" },
 ];
 
